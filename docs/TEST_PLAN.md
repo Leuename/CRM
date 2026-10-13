@@ -19,7 +19,7 @@ Tests cover session reset, contact create/archive, opportunity stage changes, da
 
 The latest manual browser pass covered 1440×900, 1024×768, 768×1024, and 390×844. Products pagination and the kiosk customer edit dialog now fit the 390px viewport; the fixed-width kiosk canvas still requires horizontal panning in portrait.
 
-A route screenshot sweep captured the 31 login, CRM, and kiosk paths other than `/` at 1440×900 and 390×844 (62 screenshots) against the local production build. All returned HTTP 200, with no page errors, off-origin requests, or document-width overflow. Playwright separately verifies the root redirect. Screenshots are in the local temporary folder `crm-release-visual-20261013`; the sweep verifies rendering and viewport fit, but is not a complete side-by-side comparison against the reference UI.
+A route screenshot sweep captured the 31 login, CRM, and kiosk paths other than `/` at 1440×900 and 390×844 (62 screenshots) against the local production build. All returned HTTP 200, with no page errors, off-origin requests, or document-width overflow. Playwright separately verifies the root redirect. The temporary screenshots were reviewed and are not part of the repository. The sweep verifies rendering and viewport fit, but is not a complete side-by-side comparison against the reference UI.
 
 ## Additional release validation
 

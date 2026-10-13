@@ -1,0 +1,21 @@
+/* Figma Variables shipped inside the .fig (one ungrouped collection, 7 variables).
+   These are library leftovers, not the CRM palette — kept for fidelity with the source file. */
+:root{
+  --white-1:rgb(255,255,255);
+  --gray-12:rgb(31,31,33);
+  --gray-13:rgb(1,1,1);
+  --blue-7:rgb(118,160,255);
+  --spacing-40:40;
+  --background-surface-inverted:var(--gray-12);
+  --typography-primary-inverted:var(--white-1);
+}
+:root[data-mode="alternative"]{
+  --gray-12:rgb(33,32,31);
+  --gray-13:rgb(15,14,14);
+  --blue-7:rgb(80,128,255);
+  --white-1:rgb(255,255,255);
+}
+:root[data-theme="dark"],.dark{
+  --background-surface-inverted:var(--white-1);
+  --typography-primary-inverted:var(--gray-12);
+}

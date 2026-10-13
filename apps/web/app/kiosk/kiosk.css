@@ -1,0 +1,2200 @@
+/* -----------------------------------------------------------------------------
+   OPERATIONS iPad kiosk. Imported once, from app/kiosk/layout.tsx.
+
+   Every class is prefixed .k-. Nothing here leaks into the back office and
+   nothing in globals.css is overridden — the two shells share only the design
+   tokens (--primary, --bg-app, --outline-resting, …) declared by the design
+   system.
+
+   Sizes come from front-desk concept and are literal: the
+   canvas is 1024x768 and the design's spacing was drawn for that canvas, so
+   scaling type or padding with viewport units would only make it wrong. The
+   frame is clamped instead (project brief ) — see .k-frame.
+   -------------------------------------------------------------------------- */
+
+:root {
+  --k-line: var(--outline-resting);
+  --k-ink: var(--text-primary);
+  --k-muted: var(--text-secondary);
+  --k-faint: #8a94a8;
+  --k-blue: var(--primary);
+  --k-blue-dark: var(--primary-dark);
+  --k-tint: rgba(64, 88, 200, 0.1);
+  --k-panel: #ffffff;
+  --k-sunken: var(--surface-sunken);
+}
+
+/* --- containment ---------------------------------------------------------- */
+
+/* The kiosk keeps its 1024x768 touch layout. On narrower screens the frame
+   stays at full tap-target size and scrolls from the left edge; on wide screens
+   the extra room remains as whitespace rather than scaling the controls. */
+.k-root {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-app);
+  /* Keep the oversized board reachable on touch devices narrower than 1024px. */
+  overflow: auto;
+}
+
+.k-frame {
+  /* Keep the touch layout and its control sizes consistent across screens. */
+  width: 1024px;
+  flex: none;
+  height: min(100dvh, 768px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--bg-app);
+  color: var(--k-ink);
+  font: 400 16px/24px var(--font-ui);
+}
+
+/* Every screen mounts here: it owns the remaining height and never scrolls the
+   page — a short real-device viewport shrinks this box, not the header. */
+.k-screen {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: k-fade var(--dur-fast, 120ms) linear;
+}
+
+@keyframes k-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .k-screen {
+    animation: none;
+  }
+}
+
+/* --- header --------------------------------------------------------------- */
+
+.k-header {
+  height: 96px;
+  flex: none;
+  background: var(--k-blue-dark);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  gap: 20px;
+}
+
+.k-back {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.k-back:hover,
+.k-back:focus-visible {
+  background: rgba(255, 255, 255, 0.18);
+}
+.k-back:active {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.k-brand {
+  width: 64px;
+  height: 64px;
+  flex: none;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.k-brand svg {
+  width: 64px;
+  height: 64px;
+}
+
+.k-titles {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+.k-title {
+  font: 700 26px/30px var(--font-ui);
+}
+.k-subtitle {
+  font: 400 15px/20px var(--font-ui);
+  opacity: 0.66;
+}
+
+.k-headtools {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex: none;
+}
+
+.k-status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  font: 600 15px/44px var(--font-ui);
+}
+.k-status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #8fb2ff;
+}
+.k-status-dot.k-off {
+  background: var(--secondary-red);
+}
+
+.k-sep {
+  width: 1px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.k-usermenu {
+  position: relative;
+}
+.k-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 56px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+.k-user[aria-expanded="true"],
+.k-user:hover,
+.k-user:focus-visible {
+  background: rgba(255, 255, 255, 0.14);
+}
+.k-user-initials {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 700 16px/1 var(--font-ui);
+  background: rgba(255, 255, 255, 0.12);
+}
+.k-user-name {
+  font: 600 16px/20px var(--font-ui);
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.k-menu {
+  position: absolute;
+  top: 64px;
+  right: 0;
+  width: 250px;
+  background: #fff;
+  border: 1px solid var(--k-line);
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(24, 32, 56, 0.16);
+  padding: 8px;
+  z-index: 20;
+}
+.k-menu-item {
+  width: 100%;
+  height: 48px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--secondary-red);
+  font: 700 16px/20px var(--font-ui);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.k-menu-item:hover,
+.k-menu-item:focus-visible {
+  background: rgba(196, 86, 78, 0.08);
+}
+
+/* --- home ----------------------------------------------------------------- */
+
+.k-home {
+  padding: 34px 46px 22px;
+  gap: 20px;
+}
+
+.k-tiles {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 22px;
+}
+
+.k-tile {
+  text-align: left;
+  border: 1px solid var(--k-line);
+  background: var(--k-panel);
+  border-radius: 16px;
+  padding: 26px 28px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  cursor: pointer;
+  color: inherit;
+  text-decoration: none;
+}
+.k-tile:hover,
+.k-tile:focus-visible {
+  border-color: var(--k-blue);
+  background: #fbfcff;
+}
+.k-tile:active {
+  background: var(--bg-app);
+}
+
+@media (max-width: 1023px) {
+  .k-root {
+    justify-content: flex-start;
+  }
+}
+.k-tile-icon {
+  width: 104px;
+  height: 104px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--k-tint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--k-blue);
+}
+.k-tile-icon svg {
+  width: 52px;
+  height: 52px;
+  display: block;
+}
+.k-tile-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.k-tile-label {
+  font: 700 26px/30px var(--font-ui);
+  color: var(--k-ink);
+}
+.k-tile-desc {
+  font: 400 17px/25px var(--font-ui);
+  color: var(--k-muted);
+  text-wrap: pretty;
+}
+.k-tile-go {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--k-blue-dark);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.k-datestrip {
+  flex: none;
+  height: 74px;
+  border: 1px solid var(--k-line);
+  background: var(--k-panel);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 0 24px;
+  font: 400 16px/22px var(--font-ui);
+  color: var(--k-muted);
+}
+.k-datestrip-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--k-tint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  color: var(--k-blue);
+}
+.k-dot-sep {
+  opacity: 0.5;
+}
+
+/* --- search screens ------------------------------------------------------- */
+
+.k-pad {
+  padding: 30px 46px 0;
+}
+
+.k-h2 {
+  font: 700 30px/38px var(--font-ui);
+  margin: 0 0 6px;
+}
+.k-p {
+  font: 400 18px/26px var(--font-ui);
+  color: var(--k-muted);
+  margin: 0 0 20px;
+}
+
+.k-searchbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 78px;
+  border: 1px solid var(--k-line);
+  background: var(--k-panel);
+  border-radius: 16px;
+  padding: 0 24px;
+  flex: none;
+  color: var(--k-blue);
+}
+.k-searchbar.k-searchbar-lg {
+  height: 82px;
+  border-color: var(--k-blue);
+}
+.k-searchbar:focus-within {
+  border-color: var(--k-blue);
+  box-shadow: inset 0 0 0 1px var(--k-blue);
+}
+.k-searchbar input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--k-ink);
+  font: 400 22px/28px var(--font-ui);
+}
+.k-searchbar-lg input {
+  font: 400 24px/30px var(--font-ui);
+}
+.k-searchbar input::placeholder {
+  color: var(--k-faint);
+}
+.k-count {
+  font: 400 16px/22px var(--font-ui);
+  color: var(--k-muted);
+  flex: none;
+}
+
+.k-results {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.k-row {
+  border: 1px solid var(--k-line);
+  background: var(--k-panel);
+  border-radius: 14px;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  cursor: pointer;
+  text-align: left;
+  flex: none;
+  color: inherit;
+  text-decoration: none;
+}
+.k-row:hover,
+.k-row:focus-visible {
+  border-color: var(--k-blue);
+  background: #fbfcff;
+}
+.k-row:active {
+  background: var(--bg-app);
+}
+.k-row-avatar {
+  width: 62px;
+  height: 62px;
+  flex: none;
+  border-radius: 16px;
+  background: var(--k-tint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 700 20px/1 var(--font-ui);
+  color: var(--k-blue);
+}
+.k-row-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.k-row-name {
+  font: 700 22px/28px var(--font-ui);
+}
+.k-row-meta {
+  font: 400 16px/22px var(--font-ui);
+  color: var(--k-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.k-chev {
+  flex: none;
+  color: var(--k-blue);
+}
+
+.k-foot {
+  flex: none;
+  padding: 16px 0;
+  font: 400 15px/20px var(--font-ui);
+  color: var(--k-muted);
+}
+
+/* --- customer record ------------------------------------------------------ */
+
+.k-profile {
+  padding: 30px 46px 0;
+  overflow-y: auto;
+}
+
+.k-profile-head {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex: none;
+}
+.k-avatar-lg {
+  width: 96px;
+  height: 96px;
+  flex: none;
+  border-radius: 24px;
+  background: var(--k-tint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 700 32px/1 var(--font-ui);
+  color: var(--k-blue);
+}
+.k-name {
+  font: 700 34px/40px var(--font-ui);
+}
+.k-company {
+  font: 400 18px/26px var(--font-ui);
+  color: var(--k-muted);
+}
+
+/* Deliberately disabled: OPERATIONS does not hold edit_contacts () and the
+   kiosk is not the place to grant it. The button stays visible so the operator
+   can see the capability exists and ask for it, rather than hunting a missing
+   control. */
+.k-locked {
+  height: 52px;
+  padding: 0 22px;
+  border: 1px dashed var(--secondary-yellow);
+  border-radius: 13px;
+  background: rgba(200, 146, 47, 0.08);
+  color: #8a6316;
+  font: 700 16px/16px var(--font-ui);
+  cursor: not-allowed;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+.k-locked-badge {
+  font: 600 12px/16px var(--font-ui);
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(200, 146, 47, 0.18);
+}
+
+.k-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 24px;
+  flex: none;
+}
+.k-card {
+  border: 1px solid var(--k-line);
+  background: var(--k-panel);
+  border-radius: 16px;
+  padding: 22px;
+}
+.k-eyebrow {
+  font: 800 11px/16px var(--font-ui);
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--k-muted);
+}
+.k-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+}
+.k-contact-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.k-contact-value {
+  font: 600 20px/26px var(--font-ui);
+  letter-spacing: 0.04em;
+}
+.k-ghost-btn {
+  height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--k-line);
+  border-radius: 12px;
+  background: #fff;
+  font: 700 15px/15px var(--font-ui);
+  color: var(--k-blue);
+  cursor: pointer;
+  flex: none;
+}
+.k-ghost-btn:hover,
+.k-ghost-btn:focus-visible {
+  border-color: var(--k-blue);
+}
+.k-ghost-btn:active {
+  background: var(--bg-app);
+}
+
+.k-space-value {
+  font: 700 24px/30px var(--font-ui);
+  margin-top: 14px;
+}
+.k-space-meta {
+  font: 400 17px/24px var(--font-ui);
+  color: var(--k-muted);
+  margin-top: 4px;
+}
+.k-space-note {
+  font: 400 14px/19px var(--font-ui);
+  color: var(--k-faint);
+  margin-top: 10px;
+}
+
+.k-section-label {
+  font: 800 11px/16px var(--font-ui);
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--k-muted);
+  margin: 24px 0 12px;
+  flex: none;
+}
+
+.k-inq-row {
+  border: 1px solid var(--k-line);
+  background: var(--k-panel);
+  border-radius: 13px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 10px;
+}
+.k-inq-ref {
+  font: 700 16px/20px var(--font-ui);
+  color: var(--k-muted);
+  width: 110px;
+  flex: none;
+}
+.k-inq-what {
+  flex: 1;
+  min-width: 0;
+  font: 600 18px/24px var(--font-ui);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.k-inq-age {
+  font: 400 16px/20px var(--font-ui);
+  color: var(--k-muted);
+  width: 110px;
+  text-align: right;
+  flex: none;
+}
+
+/* --- find inquiry --------------------------------------------------------- */
+
+.k-inq-card {
+  margin-top: 22px;
+  border: 1px solid var(--k-line);
+  background: var(--k-panel);
+  border-radius: 16px;
+  padding: 26px;
+  flex: none;
+}
+.k-inq-card + .k-inq-card {
+  margin-top: 14px;
+}
+.k-inq-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.k-inq-code {
+  font: 700 24px/30px var(--font-ui);
+  color: var(--k-blue);
+}
+.k-inq-raised {
+  font: 400 16px/22px var(--font-ui);
+  color: var(--k-muted);
+}
+.k-rule {
+  height: 1px;
+  background: #f4f6fb;
+  margin: 20px 0;
+}
+.k-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+.k-col-label {
+  font: 600 14px/20px var(--font-ui);
+  color: var(--k-muted);
+}
+.k-col-value {
+  font: 600 19px/26px var(--font-ui);
+}
+/* Revenue is masked for OPERATIONS by the server: it sends null and the kiosk
+   prints dots. Nothing here computes or infers an amount. */
+.k-col-value.k-masked {
+  letter-spacing: 0.08em;
+  color: var(--k-muted);
+}
+.k-inq-note {
+  margin-top: 18px;
+  font: 400 16px/22px var(--font-ui);
+  color: var(--k-muted);
+}
+.k-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 20px;
+}
+
+/* --- overlays ------------------------------------------------------------- */
+
+.k-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(24, 32, 56, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+}
+.k-overlay-panel {
+  width: 560px;
+  max-width: calc(100% - 64px);
+  background: #fff;
+  border-radius: 20px;
+  padding: 34px;
+  text-align: center;
+}
+.k-reveal-warn {
+  font: 800 11px/16px var(--font-ui);
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--secondary-yellow);
+}
+.k-reveal-phone {
+  font: 700 40px/48px var(--font-ui);
+  letter-spacing: 0.04em;
+  margin: 16px 0 6px;
+  word-break: break-word;
+}
+.k-reveal-email {
+  font: 400 17px/24px var(--font-ui);
+  color: var(--k-muted);
+  word-break: break-word;
+}
+.k-reveal-bar {
+  margin-top: 24px;
+  height: 6px;
+  border-radius: 999px;
+  background: #f4f6fb;
+  overflow: hidden;
+}
+.k-reveal-fill {
+  height: 6px;
+  background: var(--secondary-yellow);
+  transition: width 1s linear;
+}
+.k-reveal-left {
+  font: 400 15px/20px var(--font-ui);
+  color: var(--k-muted);
+  margin-top: 10px;
+}
+.k-btn-primary {
+  margin-top: 22px;
+  height: 52px;
+  padding: 0 30px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--k-blue);
+  color: #fff;
+  font: 700 17px/17px var(--font-ui);
+  cursor: pointer;
+}
+.k-btn-primary:hover,
+.k-btn-primary:focus-visible {
+  background: var(--k-blue-dark);
+}
+
+/* --- loading / empty / error ---------------------------------------------- */
+
+.k-state {
+  flex: none;
+  margin-top: 20px;
+  border: 1px solid var(--k-line);
+  background: var(--k-panel);
+  border-radius: 16px;
+  padding: 30px 32px;
+  font: 400 18px/26px var(--font-ui);
+  color: var(--k-muted);
+}
+.k-state strong {
+  display: block;
+  font: 700 22px/28px var(--font-ui);
+  color: var(--k-ink);
+  margin-bottom: 6px;
+}
+.k-state-error {
+  border-color: rgba(196, 86, 78, 0.4);
+  background: rgba(196, 86, 78, 0.05);
+}
+.k-skel-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+.k-skel-row {
+  height: 98px;
+  flex: none;
+  border: 1px solid var(--k-line);
+  background: var(--k-panel);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 22px;
+}
+
+/* Touch: nothing on the kiosk depends on hover, and every control keeps a
+   visible focus ring at the frame's own contrast. */
+.k-frame :focus-visible {
+  outline: 3px solid var(--k-blue);
+  outline-offset: 2px;
+}
+.k-header :focus-visible {
+  outline-color: #fff;
+}
+
+/* =============================================================================
+   New inquiry — the wizard
+   Sizes are the design's own (front-desk concept, screens
+   inq1…confirm) drawn for the 1024x768 board. The step body scrolls inside
+   .k-scroll; the footer never does, so Continue stays above the iPad keyboard.
+   ========================================================================== */
+
+/* --- step rail ------------------------------------------------------------ */
+
+.k-rail {
+  flex: none;
+  height: 66px;
+  background: var(--k-panel);
+  border-bottom: 1px solid var(--k-line);
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+}
+.k-rail-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+.k-rail-item:last-child .k-rail-line {
+  display: none;
+}
+.k-rail-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  background: transparent;
+  padding: 6px 8px;
+  margin: 0 -8px;
+  border-radius: 11px;
+  cursor: pointer;
+}
+.k-rail-btn:disabled {
+  cursor: default;
+}
+.k-rail-btn:hover:not(:disabled) {
+  background: #f4f6fb;
+}
+.k-rail-n {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 50%;
+  background: #e1e6f0;
+  color: var(--k-muted);
+  font: 700 15px/32px var(--font-ui);
+  text-align: center;
+}
+.k-rail-n-on {
+  background: var(--k-blue);
+  color: #fff;
+}
+.k-rail-label {
+  font: 600 16px/20px var(--font-ui);
+  color: var(--k-faint);
+  white-space: nowrap;
+}
+.k-rail-label-on {
+  color: var(--k-ink);
+}
+.k-rail-line {
+  flex: 1;
+  height: 2px;
+  background: #e1e6f0;
+  min-width: 14px;
+}
+
+/* --- shared step furniture ------------------------------------------------ */
+
+.k-grow {
+  flex: 1;
+  min-height: 0;
+}
+.k-pad-top {
+  margin-top: 18px;
+}
+
+/* Pinned: .k-screen is a flex column inside the clamped frame, so `flex: none`
+   here keeps the bar on screen when the software keyboard shrinks the viewport. */
+.k-foot-bar {
+  flex: none;
+  padding: 16px 46px;
+  background: var(--k-panel);
+  border-top: 1px solid var(--k-line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.k-foot-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.k-foot-hint {
+  font: 400 15px/20px var(--font-ui);
+  color: var(--secondary-red);
+}
+.k-foot-bar .k-btn-primary,
+.k-dialog-actions .k-btn-primary,
+.k-fail-actions .k-btn-primary {
+  margin-top: 0;
+  height: 56px;
+  padding: 0 40px;
+  font: 700 19px/19px var(--font-ui);
+}
+.k-foot-bar .k-ghost-btn,
+.k-dialog-actions .k-ghost-btn,
+.k-fail-actions .k-ghost-btn {
+  height: 56px;
+  padding: 0 24px;
+  font: 700 17px/17px var(--font-ui);
+  color: var(--slate-700);
+}
+.k-btn-lg {
+  height: 60px !important;
+  padding: 0 46px !important;
+  font: 700 20px/20px var(--font-ui) !important;
+}
+.k-ghost-danger:hover,
+.k-ghost-danger:focus-visible {
+  border-color: var(--secondary-red);
+  color: var(--secondary-red);
+}
+.k-btn-primary:disabled,
+.k-ghost-btn:disabled {
+  background: #8a94a8;
+  border-color: #e1e6f0;
+  color: #fff;
+  cursor: not-allowed;
+}
+.k-ghost-btn:disabled {
+  background: var(--k-sunken);
+  color: var(--k-faint);
+}
+.k-btn-danger {
+  height: 56px;
+  padding: 0 26px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--secondary-red);
+  color: #fff;
+  font: 700 17px/17px var(--font-ui);
+  cursor: pointer;
+}
+.k-btn-danger:hover,
+.k-btn-danger:focus-visible {
+  background: #a9443d;
+}
+
+/* --- step 1: mobile ------------------------------------------------------- */
+
+.k-mobile-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 640px;
+  margin-top: 26px;
+}
+.k-mobile-cc {
+  height: 80px;
+  flex: none;
+  padding: 0 22px;
+  border: 1px solid #e1e6f0;
+  border-radius: 14px;
+  background: var(--k-sunken);
+  font: 700 24px/80px var(--font-ui);
+  color: var(--slate-700);
+}
+.k-mobile-input {
+  flex: 1;
+  min-width: 0;
+  height: 80px;
+  border: 1px solid var(--k-line);
+  border-radius: 14px;
+  background: var(--k-panel);
+  font: 400 28px/28px var(--font-ui);
+  letter-spacing: 0.04em;
+  padding: 0 22px;
+  color: var(--k-ink);
+}
+
+/* --- step 1b: match ------------------------------------------------------- */
+
+.k-notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 20px;
+  border-radius: 13px;
+  background: rgba(200, 146, 47, 0.12);
+  color: #8a6316;
+  font: 600 17px/22px var(--font-ui);
+}
+
+.k-demo-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 20px 12px;
+  padding: 12px 16px;
+  border: 1px solid #cbd8f6;
+  border-radius: 13px;
+  background: #eef3ff;
+  color: #263b72;
+  font: 600 14px/20px var(--font-ui);
+}
+
+.k-demo-notice svg {
+  flex: none;
+  margin-top: 1px;
+}
+.k-shell-demo-notice {
+  flex: none;
+  margin-bottom: 8px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  font-size: 13px;
+  line-height: 18px;
+}
+.k-edit-demo-notice {
+  margin: 0 0 14px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 17px;
+}
+.k-match-card {
+  margin-top: 20px;
+  border: 1px solid var(--k-line);
+  background: var(--k-panel);
+  border-radius: 16px;
+  padding: 26px;
+  display: flex;
+  gap: 24px;
+}
+.k-match-body {
+  flex: 1;
+  min-width: 0;
+}
+.k-match-name {
+  font: 700 28px/34px var(--font-ui);
+}
+.k-match-sub {
+  font: 400 17px/24px var(--font-ui);
+  color: var(--k-muted);
+}
+.k-match-contact {
+  display: flex;
+  gap: 26px;
+  margin-top: 14px;
+  font: 400 17px/24px var(--font-ui);
+  color: var(--slate-700);
+}
+.k-inq-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- step 2: what they need ----------------------------------------------- */
+
+.k-what {
+  display: flex;
+  gap: 20px;
+  padding: 28px 46px 0;
+  min-height: 0;
+}
+.k-what-cats {
+  width: 290px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.k-cat {
+  flex: 1;
+  border: 1px solid var(--k-line);
+  background: var(--k-panel);
+  border-radius: 14px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  text-align: left;
+}
+.k-cat:hover,
+.k-cat:focus-visible {
+  border-color: var(--k-blue);
+}
+.k-cat-on {
+  border-color: var(--k-blue);
+  background: var(--k-tint);
+}
+.k-cat-icon {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--k-tint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--k-blue);
+}
+.k-cat-icon svg {
+  width: 26px;
+  height: 26px;
+  display: block;
+}
+.k-cat-label {
+  flex: 1;
+  font: 700 18px/22px var(--font-ui);
+  color: var(--k-ink);
+}
+.k-what-list {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.k-variants {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-content: start;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.k-variants .k-state,
+.k-variants .k-skel-rows {
+  grid-column: 1 / -1;
+  margin-top: 0;
+}
+.k-variant {
+  position: relative;
+  border: 1px solid var(--k-line);
+  background: var(--k-panel);
+  border-radius: 13px;
+  align-self: start;
+  padding: 16px 18px 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.k-variant:hover,
+.k-variant:focus-visible {
+  border-color: var(--k-blue);
+}
+.k-variant-on {
+  border-color: var(--k-blue);
+  background: var(--k-tint);
+}
+.k-variant-name {
+  font: 700 19px/24px var(--font-ui);
+  color: var(--k-ink);
+  /* Clear of the chevron sitting at the top-right corner. */
+  padding-right: 34px;
+}
+.k-variant-meta {
+  font: 400 15px/20px var(--font-ui);
+  color: var(--k-muted);
+}
+.k-variant-rate {
+  font: 700 17px/22px var(--font-ui);
+  color: var(--k-blue);
+}
+
+/* The room itself. Always in the DOM so it can animate; max-height is the
+   design's own 220px, which clears the 130px photo plus its caption. */
+.k-variant-panel {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition:
+    max-height 0.26s ease,
+    opacity 0.18s linear;
+}
+.k-variant-panel-open {
+  max-height: 220px;
+  opacity: 1;
+}
+.k-variant-photo {
+  width: 100%;
+  height: 130px;
+  margin-top: 8px;
+  border-radius: 9px;
+  /* The tint shows while the photograph decodes, and stands in for a product
+     the catalogue has no picture of — never a broken-image glyph. */
+  background: #e7edf9;
+  overflow: hidden;
+}
+.k-variant-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.k-variant-caption {
+  font: 400 13px/18px var(--font-ui);
+  color: var(--k-muted);
+  margin-top: 7px;
+  text-wrap: pretty;
+}
+.k-variant-toggle {
+  position: absolute;
+  right: 12px;
+  top: 14px;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--k-tint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.12s linear;
+}
+.k-variant-toggle:hover,
+.k-variant-toggle:focus-visible {
+  background: rgba(64, 88, 200, 0.2);
+}
+.k-variant-chev {
+  font: 700 13px/13px var(--font-ui);
+  color: var(--k-blue);
+  display: block;
+  transition: transform 0.26s ease;
+}
+.k-variant-toggle[aria-expanded="true"] .k-variant-chev {
+  transform: rotate(90deg);
+}
+.k-what-note {
+  flex: none;
+  font: 400 14px/19px var(--font-ui);
+  color: var(--k-muted);
+  margin: 10px 0 0;
+}
+
+/* --- step 3: details ------------------------------------------------------ */
+
+.k-h2-tight {
+  font: 700 28px/34px var(--font-ui);
+  margin: 0 0 14px;
+}
+.k-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+}
+.k-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 16px;
+}
+.k-form-grid .k-field {
+  margin-top: 0;
+}
+.k-field-label {
+  font: 600 15px/20px var(--font-ui);
+  color: var(--slate-700);
+}
+.k-field-optional {
+  color: var(--k-muted);
+  font-weight: 400;
+}
+.k-input {
+  height: 62px;
+  border: 1px solid var(--k-line);
+  border-radius: 12px;
+  background: var(--k-panel);
+  font: 400 20px/24px var(--font-ui);
+  padding: 0 18px;
+  color: var(--k-ink);
+}
+.k-textarea {
+  height: 96px;
+  resize: none;
+  border: 1px solid var(--k-line);
+  border-radius: 12px;
+  background: var(--k-panel);
+  font: 400 18px/26px var(--font-ui);
+  padding: 14px 18px;
+  color: var(--k-ink);
+}
+/* Read-only, not disabled: the value matters to the operator reading it back,
+   and a record OPERATIONS cannot edit should look settled, not broken. */
+.k-field-locked {
+  min-height: 62px;
+  border: 1px solid #e1e6f0;
+  border-radius: 12px;
+  background: var(--k-sunken);
+  font: 400 20px/62px var(--font-ui);
+  color: var(--slate-700);
+  padding: 0 18px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.k-consent {
+  margin-top: 16px;
+  border: 1px solid var(--k-line);
+  border-radius: 14px;
+  background: var(--k-panel);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.k-consent-rule {
+  height: 1px;
+  background: #f4f6fb;
+}
+.k-consent-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+.k-check {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 9px;
+  border: 2px solid var(--k-line);
+  background: var(--k-panel);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.k-check-on {
+  border-color: var(--k-blue);
+  background: var(--k-blue);
+}
+.k-check-req {
+  border-color: var(--secondary-red);
+}
+.k-consent-text {
+  font: 400 17px/24px var(--font-ui);
+  color: var(--k-ink);
+}
+.k-required {
+  color: var(--secondary-red);
+  font-weight: 600;
+}
+.k-optional {
+  color: var(--k-muted);
+}
+
+/* --- step 4: review ------------------------------------------------------- */
+
+.k-review {
+  border: 1px solid var(--k-line);
+  background: var(--k-panel);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.k-review-row {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid #f4f6fb;
+  background: var(--k-panel);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  cursor: pointer;
+  text-align: left;
+  min-height: 64px;
+}
+.k-review-row:last-child {
+  border-bottom: 0;
+}
+.k-review-row:hover,
+.k-review-row:focus-visible {
+  background: var(--k-sunken);
+}
+.k-review-label {
+  width: 190px;
+  flex: none;
+  font: 600 16px/22px var(--font-ui);
+  color: var(--k-muted);
+}
+.k-review-value {
+  flex: 1;
+  min-width: 0;
+  font: 600 19px/26px var(--font-ui);
+  color: var(--k-ink);
+}
+.k-review-edit {
+  flex: none;
+  color: var(--k-blue);
+  display: flex;
+}
+.k-review-foot {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  font: 400 16px/22px var(--font-ui);
+  color: var(--k-muted);
+}
+
+/* --- confirmation --------------------------------------------------------- */
+
+.k-confirm {
+  align-items: stretch;
+}
+.k-confirm-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 34px 46px 20px;
+}
+.k-confirm-tick {
+  width: 96px;
+  height: 96px;
+  flex: none;
+  border-radius: 50%;
+  background: rgba(64, 88, 200, 0.14);
+  color: var(--secondary-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.k-confirm-h {
+  font: 700 34px/42px var(--font-ui);
+  margin: 18px 0 6px;
+}
+.k-ref-plate {
+  margin-top: 20px;
+  padding: 16px 40px;
+  border-radius: 16px;
+  background: var(--k-blue-dark);
+  color: #fff;
+  text-align: center;
+}
+.k-ref-plate .k-eyebrow {
+  color: rgba(255, 255, 255, 0.65);
+}
+.k-ref-code {
+  font: 700 44px/52px var(--font-ui);
+  letter-spacing: 0.02em;
+}
+.k-confirm-rows {
+  width: 100%;
+  max-width: 720px;
+  margin: 20px 0 0;
+  border: 1px solid var(--k-line);
+  background: var(--k-panel);
+  border-radius: 16px;
+  padding: 6px 22px;
+}
+.k-confirm-row {
+  display: flex;
+  gap: 18px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f4f6fb;
+}
+.k-confirm-row:last-child {
+  border-bottom: 0;
+}
+.k-confirm-row dt {
+  width: 170px;
+  flex: none;
+  font: 600 15px/22px var(--font-ui);
+  color: var(--k-muted);
+}
+.k-confirm-row dd {
+  flex: 1;
+  margin: 0;
+  font: 600 17px/22px var(--font-ui);
+}
+.k-soon {
+  font: 600 12px/16px var(--font-ui);
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #e1e6f0;
+  color: var(--neutral-500);
+  margin-left: 10px;
+}
+
+/* --- unreachable ---------------------------------------------------------- */
+
+.k-centre {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 96px;
+}
+.k-centre-text {
+  max-width: 560px;
+}
+.k-fail-mark {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: rgba(196, 86, 78, 0.12);
+  color: var(--secondary-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.k-fail-actions {
+  display: flex;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+/* --- dialogs -------------------------------------------------------------- */
+
+.k-dialog {
+  width: 520px;
+  text-align: left;
+}
+.k-dialog-h {
+  font: 700 26px/32px var(--font-ui);
+  margin: 0 0 10px;
+}
+.k-dialog-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 26px;
+}
+
+/* =============================================================================
+   Today's visits
+   Read-only calendar over the activities due in the visible range. Day is the
+   design's canonical view; week and month are the same data at lower zoom.
+   ========================================================================== */
+
+.k-visits {
+  padding: 22px 34px 0;
+}
+.k-cal-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.k-cal-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+.k-cal-step {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--k-line);
+  background: var(--k-panel);
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--k-blue);
+  cursor: pointer;
+}
+.k-cal-today {
+  height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--k-line);
+  background: var(--k-panel);
+  border-radius: 11px;
+  font: 700 15px/15px var(--font-ui);
+  color: var(--k-blue);
+  cursor: pointer;
+}
+.k-cal-step:hover,
+.k-cal-step:focus-visible,
+.k-cal-today:hover,
+.k-cal-today:focus-visible {
+  border-color: var(--k-blue);
+}
+.k-cal-title {
+  flex: 1;
+  min-width: 0;
+  font: 700 27px/34px var(--font-ui);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.k-cal-tabs {
+  flex: none;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: #f4f6fb;
+  border-radius: 12px;
+}
+.k-cal-tab {
+  height: 44px;
+  min-width: 74px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #59647b;
+  font: 700 15px/15px var(--font-ui);
+  cursor: pointer;
+}
+.k-cal-tab-on {
+  background: var(--k-panel);
+  color: var(--k-blue);
+  box-shadow: 0 1px 3px rgba(24, 32, 56, 0.14);
+}
+.k-cal-foot {
+  flex: none;
+  padding: 12px 0;
+  font: 400 14px/20px var(--font-ui);
+  color: #7c879c;
+  min-height: 44px;
+}
+
+/* --- day ------------------------------------------------------------------ */
+
+.k-cal-scroll {
+  flex: 1;
+  min-height: 0;
+  margin-top: 14px;
+  border: 1px solid var(--outline-hairline);
+  border-radius: 16px;
+  background: var(--k-panel);
+  overflow: auto;
+}
+.k-daygrid {
+  position: relative;
+}
+/* A real <button>: clicking an hour opens that hour in the drill-down. */
+.k-hour {
+  display: flex;
+  align-items: flex-start;
+  border: 0;
+  border-top: 1px solid #e9ecf4;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+/* The active edge is an inset shadow, not a border: a 3px border would take
+   layout width and shift .k-hour-label off the 78px gutter that .k-events is
+   positioned against, so the hour rows and the visit blocks would disagree by
+   3px only while hovered. */
+.k-hour:hover,
+.k-hour:focus-visible {
+  background: var(--k-tint);
+  box-shadow: inset 3px 0 0 var(--k-blue);
+}
+.k-hour-label {
+  width: 78px;
+  flex: none;
+  padding: 2px 12px 0 0;
+  text-align: right;
+  font: 400 13px/16px var(--font-ui);
+  color: #8a94a8;
+}
+/* Display only, and drawn ON TOP of the hour rows — pointer-events: none lets
+   a click anywhere in an hour reach the hour button underneath. */
+.k-events {
+  position: absolute;
+  left: 78px;
+  right: 14px;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+/* Positioned by start time only: an activity is an instant, not a span — the
+   CRM records no duration, so drawing a block height would be an invention. */
+.k-event {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 46px;
+  background: var(--k-tint);
+  border-left: 4px solid var(--k-blue);
+  border-radius: 9px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow: hidden;
+}
+.k-event-next {
+  background: rgba(200, 146, 47, 0.14);
+  border-left-color: #a87c24;
+}
+.k-event-time {
+  flex: none;
+  width: 96px;
+  font: 700 15px/20px var(--font-ui);
+  color: var(--k-blue);
+  white-space: nowrap;
+}
+.k-event-next .k-event-time {
+  color: #a87c24;
+}
+.k-event-name {
+  flex: none;
+  max-width: 260px;
+  font: 700 16px/20px var(--font-ui);
+  color: var(--k-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.k-event-what {
+  flex: 1;
+  min-width: 0;
+  font: 400 15px/20px var(--font-ui);
+  color: #44506d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.k-next-badge {
+  flex: none;
+  font: 700 12px/16px var(--font-ui);
+  color: #fff;
+  background: var(--k-blue);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.k-event-host {
+  flex: none;
+  font: 400 14px/20px var(--font-ui);
+  color: #7c879c;
+  width: 110px;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.k-nowline {
+  position: absolute;
+  left: -8px;
+  right: 0;
+  height: 0;
+  border-top: 2px solid var(--secondary-red);
+  display: flex;
+  align-items: center;
+}
+.k-nowdot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--secondary-red);
+  margin-left: -9px;
+}
+
+/* --- week ----------------------------------------------------------------- */
+
+.k-weekgrid {
+  flex: 1;
+  min-height: 0;
+  margin-top: 14px;
+  border: 1px solid var(--outline-hairline);
+  border-radius: 16px;
+  background: var(--k-panel);
+  display: flex;
+  overflow: hidden;
+}
+.k-weekday {
+  flex: 1;
+  min-width: 0;
+  border-left: 1px solid #e9ecf4;
+  display: flex;
+  flex-direction: column;
+}
+.k-weekday:first-child {
+  border-left: 0;
+}
+.k-weekday-today {
+  background: rgba(64, 88, 200, 0.035);
+}
+.k-weekday-head {
+  flex: none;
+  width: 100%;
+  padding: 12px 0 10px;
+  text-align: center;
+  border: 0;
+  border-bottom: 1px solid #e9ecf4;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+.k-weekday-head:hover,
+.k-weekday-head:focus-visible {
+  background: var(--k-tint);
+}
+.k-weekday-dow {
+  display: block;
+  font: 800 10px/14px var(--font-ui);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #7c879c;
+}
+.k-weekday-num {
+  display: block;
+  font: 700 20px/26px var(--font-ui);
+  color: #28324f;
+  margin-top: 2px;
+}
+.k-weekday-today .k-weekday-num {
+  color: var(--k-blue);
+}
+.k-weekday-items {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.k-chip {
+  /* flex: none — a busy day was compressing every chip into an unreadable
+     sliver instead of scrolling the column. */
+  flex: none;
+  background: var(--k-tint);
+  border-left: 3px solid var(--k-blue);
+  border-radius: 7px;
+  padding: 7px 8px;
+  overflow: hidden;
+}
+.k-chip-time {
+  font: 700 12px/16px var(--font-ui);
+  color: var(--k-blue);
+}
+.k-chip-name,
+.k-chip-what {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.k-chip-name {
+  font: 700 13px/17px var(--font-ui);
+  color: var(--k-ink);
+}
+.k-chip-what {
+  font: 400 12px/16px var(--font-ui);
+  color: #59647b;
+}
+
+/* --- month ---------------------------------------------------------------- */
+
+.k-monthgrid {
+  flex: 1;
+  min-height: 0;
+  margin-top: 14px;
+  border: 1px solid var(--outline-hairline);
+  border-radius: 16px;
+  background: var(--k-panel);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.k-month-dows {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid #e9ecf4;
+}
+.k-month-dow {
+  padding: 10px 0;
+  text-align: center;
+  font: 800 10px/14px var(--font-ui);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #7c879c;
+}
+.k-month-cells {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 1fr;
+}
+.k-month-cell {
+  min-width: 0;
+  border: 0;
+  border-left: 1px solid #e9ecf4;
+  border-top: 1px solid #e9ecf4;
+  padding: 6px 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.k-month-cell:hover,
+.k-month-cell:focus-visible {
+  background: var(--k-tint);
+}
+.k-month-out {
+  background: #f9fbff;
+}
+.k-month-num {
+  flex: none;
+  /* Otherwise the today pill stretches the full cell width as a flex child. */
+  align-self: flex-start;
+  font: 700 14px/22px var(--font-ui);
+  color: #28324f;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  text-align: center;
+}
+.k-month-out .k-month-num {
+  color: #b7c1d5;
+}
+.k-month-num-today {
+  background: var(--k-blue);
+  color: #fff;
+}
+.k-month-item {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  font: 400 11px/15px var(--font-ui);
+  color: #28324f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.k-month-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--k-blue);
+  flex: none;
+}
+.k-month-more {
+  flex: none;
+  font: 700 11px/15px var(--font-ui);
+  color: #7c879c;
+}
+
+/* --- drill-down ----------------------------------------------------------- */
+/* One hour, or one whole day, over the data already on screen. Sized like the
+   edit panel so a busy day scrolls inside the 1024x768 board rather than
+   pushing the composition around. */
+
+.k-drill {
+  width: 720px;
+  text-align: left;
+  max-height: calc(100% - 48px);
+  display: flex;
+  flex-direction: column;
+  padding: 26px 28px;
+}
+.k-drill-head {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.k-drill-head .k-dialog-h {
+  margin: 0;
+}
+.k-drill-sub {
+  margin: 4px 0 0;
+  font: 400 14px/20px var(--font-ui);
+  color: #7c879c;
+}
+.k-drill-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin-top: 18px;
+}
+.k-drill-back {
+  display: block;
+  margin-bottom: 14px;
+  padding: 8px 14px;
+  border: 1px solid var(--k-line);
+  border-radius: 10px;
+  background: var(--k-panel);
+  font: 700 14px/18px var(--font-ui);
+  color: var(--k-blue);
+  cursor: pointer;
+}
+.k-drill-back:hover,
+.k-drill-back:focus-visible,
+.k-drill-hour:hover,
+.k-drill-hour:focus-visible {
+  border-color: var(--k-blue);
+}
+.k-drill-hour {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  margin: 14px 0 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--k-line);
+  border-radius: 10px;
+  background: var(--k-panel);
+  font: 700 16px/22px var(--font-ui);
+  color: var(--k-blue);
+  text-align: left;
+  cursor: pointer;
+}
+.k-drill-hour-count {
+  font: 400 13px/18px var(--font-ui);
+  color: #7c879c;
+}
+.k-drill-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--k-blue);
+  border-radius: 8px;
+  background: var(--k-tint);
+  margin-bottom: 6px;
+  overflow: hidden;
+}
+.k-drill-time {
+  flex: none;
+  width: 92px;
+  font: 700 15px/20px var(--font-ui);
+  color: var(--k-blue);
+  white-space: nowrap;
+}
+.k-drill-name {
+  flex: none;
+  max-width: 220px;
+  font: 700 15px/20px var(--font-ui);
+  color: var(--k-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.k-drill-what {
+  flex: 1;
+  min-width: 0;
+  font: 400 14px/20px var(--font-ui);
+  color: #44506d;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.k-drill-host {
+  flex: none;
+  width: 100px;
+  text-align: right;
+  font: 400 13px/20px var(--font-ui);
+  color: #7c879c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.k-drill-note {
+  flex: none;
+  margin: 14px 0 0;
+  font: 400 13px/19px var(--font-ui);
+  color: #7c879c;
+}
+
+/* Field-level messages inside an error card (a 422 the operator can fix). */
+.k-field-errors {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+.k-field-errors li {
+  font: 400 17px/25px var(--font-ui);
+  color: var(--k-ink);
+}
+
+/* --- edit details --------------------------------------------------------- */
+/* Wider than the confirm dialogs: it holds the wizard's two-column field grid,
+   and squeezing that into 520px would stack the fields into a scroll. */
+.k-editpanel {
+  width: 720px;
+  text-align: left;
+  max-height: calc(100% - 48px);
+  overflow-y: auto;
+}
+.k-editpanel .k-dialog-actions {
+  align-items: center;
+}
+/* The +63 box beside a 62px field rather than step 1's 80px one. */
+.k-mobile-row-tight {
+  margin-top: 0;
+  max-width: none;
+  gap: 10px;
+}
+.k-mobile-cc-sm {
+  height: 62px;
+  font: 700 18px/62px var(--font-ui);
+  padding: 0 16px;
+  border-radius: 12px;
+}
+/* A field that needs the full row of the two-column form grid. */
+.k-field-wide {
+  grid-column: 1 / -1;
+}
+
+/* The kiosk canvas stays at its designed 1024px width, but an overlay must fit
+   the actual phone viewport rather than inheriting that canvas width. */
+@media (max-width: 759px) {
+  .k-overlay {
+    position: fixed;
+    padding: 12px;
+    overflow-y: auto;
+  }
+
+  .k-editpanel {
+    width: 720px;
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+  }
+
+  .k-editpanel .k-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .k-editpanel .k-field,
+  .k-editpanel .k-input {
+    min-width: 0;
+  }
+
+  .k-editpanel .k-input:not(.k-mobile-input) {
+    width: 100%;
+  }
+
+  .k-editpanel .k-mobile-row-tight .k-input {
+    flex: 1;
+  }
+}

@@ -1,0 +1,34 @@
+# Privacy and security audit
+
+## Runtime boundary
+
+- `apps/web/lib/api.ts` routes business requests to the local simulator.
+- `apps/web/lib/demo-fetch.ts` does not call native `fetch` or an external API.
+- The Next config has no backend rewrite or API target.
+- No database, Supabase, or PostgreSQL package is declared for the web app.
+- The response security headers include a same-origin CSP, frame denial, MIME sniffing protection, and referrer policy.
+- Demo state is stored in session storage per browser tab and is cleared by logout. It does not synchronize between tabs.
+
+## Data review
+
+The seed uses fictional identities and organizations, `.example` email domains, a reserved fictional phone-number range, and invented business values. Visitor-entered values are arbitrary and may be real; CRM and kiosk screens, including lookup pages, warn users not to enter real customer details. Source backend files, SQL, real seeds, environment files, secrets, private history, and private source handoff material are excluded.
+
+## Automated checks
+
+`npm run check:demo` scans frontend source/configuration for selected production service variables and hostnames, non-example external domains, native fetch in the UI API module, and database client dependencies. It passed on the current code. This is a focused guard, not a general-purpose secret scanner.
+
+The exact staged-tree Gitleaks scan passed on `2026-10-13`: 0 leaks found across approximately 1.26 MB. A broad working-tree scan found 14 generic-key pattern matches in Next-generated `.next` manifests/chunks only; those build artifacts are ignored by Git and excluded from publication. Rerun Gitleaks after the pending framework security update and against the final staged files immediately before publishing.
+
+A source and documentation search for the remaining original-business schema names returned no matches after neutral service terminology was applied.
+
+On `2026-10-13`, `npm audit --omit=dev --audit-level=low` reported 0 production vulnerabilities. The full development dependency tree reports 5 High findings through the Next ESLint configuration's transitive `braces` dependency. npm's automatic fix would downgrade `eslint-config-next` to an incompatible major version, so it was not applied. Recheck for a compatible fix before publication. [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm).
+
+As of `2026-10-13`, the Next.js team had announced an out-of-band security update planned for October 14, 2026, covering two Critical and one High severity upstream vulnerabilities. The release and remediation guidance are not yet published. Review the official update and apply its recommendation before deploying. [Official Next.js announcement](https://nextjs.org/blog/upcoming-nextjs-security-update-october-2026).
+
+## Release checks still needed
+
+- Re-run a dedicated secret scan after the pending framework security update and inspect the exact staged tree before publishing.
+- Inspect browser requests against the deployed build and confirm all business operations stay same-origin.
+- Re-run current production and full dependency audits immediately before public release.
+- Create and configure the hosting project, then verify the published URL and public flows.
+- Review the final staged file list, including design assets and licenses.

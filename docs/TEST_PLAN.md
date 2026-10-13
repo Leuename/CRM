@@ -1,0 +1,26 @@
+# Test plan
+
+## Automated commands
+
+| Command                | Purpose                                                                                                                                                                                                                                       | Current result                                                |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `npm run typecheck`    | TypeScript validation                                                                                                                                                                                                                         | Passed                                                        |
+| `npm run lint`         | ESLint                                                                                                                                                                                                                                        | Passed                                                        |
+| `npm run check:demo`   | Production boundary guard                                                                                                                                                                                                                     | Passed; 157 app and design-system source/config files scanned |
+| `npm run test:unit`    | Mock API integration tests                                                                                                                                                                                                                    | Passed; 12 tests                                              |
+| `npm run build`        | Optimized Next.js build and route generation                                                                                                                                                                                                  | Passed; all 32 application routes generated                   |
+| `npm run e2e`          | Browser smoke flows for all CRM list/detail/create/edit and settings routes, legacy redirects, Admin, Operations, and Sales, including same-origin requests, URL safety, per-tab isolation, login validation announcements, phone-width opportunity and kiosk edit flows, and pagination visibility, navigation, and disabled boundaries | Passed against the current local production build; 12 tests |
+| `npm audit --omit=dev` | Production dependency audit                                                                                                                                                                                                                   | Passed; 0 vulnerabilities                                     |
+| `npm audit`            | Full dependency audit                                                                                                                                                                                                                          | 5 High advisories in the build-time ESLint chain via `braces@3.0.3`; no patched version is published yet |
+
+## Mock API coverage
+
+Tests cover session reset, contact create/archive, opportunity stage changes, dashboard creation/close/snapshot periods, stage filtering, dense revenue months, null-source grouping/drilldown, error envelopes, Operations PII masking/reveal, Triage ownership limits, and invalid login. Browser tests also verify that the front-desk edit form shows a demo-only notice and that one tab's changes do not appear in a second tab.
+
+The latest manual browser pass covered 1440×900, 1024×768, 768×1024, and 390×844. Products pagination and the kiosk customer edit dialog now fit the 390px viewport; the fixed-width kiosk canvas still requires horizontal panning in portrait.
+
+A route screenshot sweep captured the 31 login, CRM, and kiosk paths other than `/` at 1440×900 and 390×844 (62 screenshots) against the local production build. All returned HTTP 200, with no page errors, off-origin requests, or document-width overflow. Playwright separately verifies the root redirect. Screenshots are in the local temporary folder `crm-release-visual-20261013`; the sweep verifies rendering and viewport fit, but is not a complete side-by-side comparison against the reference UI.
+
+## Additional release validation
+
+Mobile Lighthouse passed the sign-in and dashboard pages with 100 scores for accessibility, best practices, SEO, and agentic browsing. Before public release, complete the reference UI comparison and manual screen-reader review, apply and review the announced Next.js security update, configure hosting, inspect deployed network traffic, and verify public flows. The focused keyboard pass does not cover every route. The Playwright suite is a smoke suite, not full visual or accessibility regression coverage. Run Gitleaks on the final staged files before publishing.

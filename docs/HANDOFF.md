@@ -34,7 +34,7 @@ The app is for demonstration only. The forms accept arbitrary text, which could 
 ## Vercel status
 
 - The hosted deployment has not been verified against the current source. Keep previews protected and do not share a preview or branch alias as the public demo URL; verify anonymous access at the eventual public URL.
-- No public deployment verifies the current workspace. The branch `feat/portfolio-demo` has uncommitted changes. Confirm and configure a publicly accessible URL, then verify the deployed SHA and visitor flows.
+- No public deployment verifies the current workspace. Confirm and configure a publicly accessible URL, then verify the deployed SHA and visitor flows.
 - The local production build at `http://127.0.0.1:6969/login` is current again. It was restarted from the latest `.next` build after the old process served stale assets; `/dashboard` and its JavaScript assets now return HTTP 200, and the 20-test browser suite passes there with one worker. Port 6975 is no longer needed for local verification.
 
 See [release readiness](RELEASE_READINESS.md), [test plan](TEST_PLAN.md), and [attributions](../ATTRIBUTIONS.md) for detail.

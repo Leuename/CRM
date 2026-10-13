@@ -25,7 +25,7 @@ A source and documentation search for the remaining original-business schema nam
 
 On `2026-10-13`, `npm audit --omit=dev --audit-level=low` reported 0 production vulnerabilities. The full development dependency tree reports 5 High findings through the Next ESLint configuration's transitive `braces` dependency. npm's automatic fix would downgrade `eslint-config-next` to an incompatible major version, so it was not applied. Recheck for a compatible fix before publication. [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm).
 
-As of `2026-10-13`, the Next.js team had announced an out-of-band security update planned for October 14, 2026, covering two Critical and one High severity upstream vulnerabilities. The release and remediation guidance are not yet published. Review the official update and apply its recommendation before deploying. [Official Next.js announcement](https://nextjs.org/blog/upcoming-nextjs-security-update-october-2026).
+As of `2026-10-14T00:11:12+08:00`, the official Next.js security update scheduled for October 14 had not yet appeared in the release sources checked; affected versions and upgrade instructions remain pending. Hold production launch until the official guidance is published, apply any required upgrade, and rerun the release checks. See the [official Next.js announcement](https://nextjs.org/blog/upcoming-nextjs-security-update-october-2026).
 
 ## Release checks still needed
 

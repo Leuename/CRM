@@ -4,21 +4,21 @@
 
 The Aster CRM demo is a client-side simulator with fictional seed data. Sign-in, roles, and business changes are simulated; data stays in the current browser tab. It is not suitable for real customer data or production CRM use.
 
-**Local application checks and PR CI pass, but the public launch is waiting on the Next.js security update announced for October 14.** As of `2026-10-14T07:14:19+08:00` (Manila), Next.js still describes the update as upcoming; the affected ranges and upgrade instructions are not available. The candidate uses Next.js 16.4.0. Vercel reports `live=false`; the latest READY preview uses commit `cc618274afbe4561ef3211452509524fbabdadec`, and SSO protects all deployments. There is no live production deployment or public production URL. Recheck the official guidance, map its affected ranges to the candidate, apply any required update, then rerun the release suite before launch. See the [official announcement](https://nextjs.org/blog/upcoming-nextjs-security-update-october-2026) and [Next.js advisories](https://github.com/vercel/next.js/security/advisories).
+**Local application checks pass, but the public launch is waiting on the Next.js security update announced for October 14.** As of `2026-10-14T07:28:20+08:00` (Manila), Next.js still describes the update as upcoming; affected ranges and upgrade instructions are not available. The candidate uses Next.js 16.4.0. Vercel reports `live=false`; the latest preview is READY, and SSO protects all deployments. There is no live production deployment or public production URL. Recheck the official guidance, map its affected ranges to the candidate, apply any required update, then rerun the release suite before launch. See the [official announcement](https://nextjs.org/blog/upcoming-nextjs-security-update-october-2026) and [Next.js advisories](https://github.com/vercel/next.js/security/advisories).
 
 ## Latest local verification
 
 The current working tree passed these checks on October 14, 2026:
 
-- TypeScript, ESLint, and the production-boundary guard. The guard scanned 161 application and design-system source/config files.
-- 13 unit tests.
+- TypeScript, ESLint, and the production-boundary guard. The guard scanned 166 frontend and design-system source/config files.
+- All 4 production-boundary guard tests and 14 unit tests.
 - A fresh optimized Next.js build generated all 32 application routes.
 - All 23 Playwright tests passed serially against that production build on isolated port 6971. The suite includes demo sign-in autofill and dashboard navigation, route coverage, keyboard behavior, form validation, kiosk flows, phone-width controls, same-origin requests, safe URLs, and per-tab isolation. Port 6969 remains the local demo port.
 - `npm audit --omit=dev`: zero production dependency findings.
 - Prettier check passed for the files changed in this release. The repository-wide `npm run format:check` still flags files outside this release patch; unrelated files were not reformatted.
-- Gitleaks scanned 190 current public-tree source and documentation files (1.23 MB), excluding generated `.next` output and installed dependencies; zero leaks were found.
+- Gitleaks scanned the current public tree (about 1.52 MB), excluding generated `.next`, installed dependencies, and test reports; zero leaks were found.
 
-The full `npm audit` reports five High findings through `braces@3.0.3` in the development-only Next.js ESLint dependency chain. No patched `braces` version is published, and `npm audit fix --force` proposes an incompatible downgrade of `eslint-config-next`. `braces` is absent from the production dependency audit. The latest captured audit is `2026-10-13T23:05Z`; recheck this before the release. See [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm).
+The full `npm audit` reports five High findings through `braces@3.0.3` in the development-only Next.js ESLint dependency chain. No patched `braces` version is published, and `npm audit fix --force` proposes an incompatible downgrade of `eslint-config-next`. `braces` is absent from the production dependency audit. The latest captured audit is `2026-10-13T23:28Z`; recheck this before the release. See [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm).
 
 ## Visual and accessibility evidence
 

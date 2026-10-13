@@ -17,15 +17,15 @@ The seed uses fictional identities and organizations, `.example` email domains, 
 
 ## Automated checks
 
-`npm run check:demo` scans frontend source/configuration for selected production service variables and hostnames, non-example external domains, native fetch in the UI API module, and database client dependencies. It passed on the current code. This is a focused guard, not a general-purpose secret scanner.
+`npm run check:demo` scans frontend and design-system source/configuration for production service variables and hostnames, non-example external domains, and native network transports. It also checks declared backend client dependencies. Four negative/allowlist tests verify that the guard rejects direct frontend network calls, backend configuration, and backend dependencies while permitting the browser simulator and reserved `.example` domains. This remains a focused boundary guard, not a general-purpose secret scanner.
 
-Gitleaks passed on the candidate commit on `2026-10-13`: 0 leaks found across approximately 1.26 MB. The current tracked diff scan covered approximately 21.84 KB and found no leaks; the three new source files were scanned separately (about 4.99 KB total) and had no findings. A broad working-tree scan found 16 generic-key pattern matches, all in Git-ignored `.next` output; redacted path review identified generated Next.js preview and server-action metadata, not source files. Rerun Gitleaks over the exact final staged tree after the framework security update and immediately before publishing.
+On `2026-10-14T07:30:44+08:00` (Manila), Gitleaks scanned the current public tree (about 1.52 MB), excluding generated `.next`, installed dependencies, and test reports; it found zero leaks. Rerun Gitleaks over the exact final staged tree after the framework security update and immediately before publishing.
 
 A source and documentation search for the remaining original-business schema names returned no matches after neutral service terminology was applied.
 
 On `2026-10-13`, `npm audit --omit=dev --audit-level=low` reported 0 production vulnerabilities. The full development dependency tree reports 5 High findings through the Next ESLint configuration's transitive `braces` dependency. npm's automatic fix would downgrade `eslint-config-next` to an incompatible major version, so it was not applied. Recheck for a compatible fix before publication. [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm).
 
-As of `2026-10-14T00:11:12+08:00`, the official Next.js security update scheduled for October 14 had not yet appeared in the release sources checked; affected versions and upgrade instructions remain pending. Hold production launch until the official guidance is published, apply any required upgrade, and rerun the release checks. See the [official Next.js announcement](https://nextjs.org/blog/upcoming-nextjs-security-update-october-2026).
+As of `2026-10-14T07:28:20+08:00` (Manila), the official Next.js security update scheduled for October 14 was still described as upcoming; affected versions and upgrade instructions remain pending. Hold production launch until the official guidance is published, apply any required upgrade, and rerun the release checks. See the [official Next.js announcement](https://nextjs.org/blog/upcoming-nextjs-security-update-october-2026).
 
 ## Release checks still needed
 

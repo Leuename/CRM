@@ -474,8 +474,8 @@ export function createDemoSeed(): object {
     };
   });
   const activities = Array.from({ length: 42 }, (_, i) => {
-    const contact = contacts[(i * 5) % contacts.length];
     const opportunity = opportunities[(i * 3) % opportunities.length];
+    const contact = contacts.find((candidate) => candidate.id === opportunity.primary_contact_id)!;
     const day = i < 6 ? 13 : 1 + (i % 12);
     const hour = i < 6 ? 10 + i : 9 + (i % 8);
     const types = ["CALL", "EMAIL", "MEETING", "SITE_VISIT", "NOTE"];
@@ -492,7 +492,7 @@ export function createDemoSeed(): object {
       ][i % 5],
       occurred_at: iso(day, hour),
       contact_id: contact.id,
-      company_id: contact.company_id,
+      company_id: opportunity.company_id,
       opportunity_id: opportunity.id,
       created_by: author.id,
       created_by_name: author.display_name,

@@ -2,36 +2,38 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const root = path.resolve(appRoot, "..", "..");
-const files = [];
-const extensions = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".css", ".svg"]);
+const scriptPath = fileURLToPath(import.meta.url);
+const appRoot = path.resolve(path.dirname(scriptPath), "..");
+const repositoryRoot = path.resolve(appRoot, "..", "..");
+const extensions = new Set([
+  ".ts",
+  ".tsx",
+  ".js",
+  ".jsx",
+  ".mjs",
+  ".cjs",
+  ".css",
+  ".svg",
+  ".json",
+  ".yaml",
+  ".yml",
+  ".toml",
+  ".conf",
+  ".config",
+]);
+const ignoredDirectories = new Set([
+  "node_modules",
+  ".next",
+  ".git",
+  "test-results",
+  "playwright-report",
+  "blob-report",
+]);
 
-async function walk(directory) {
-  for (const entry of await readdir(directory, { withFileTypes: true })) {
-    if (
-      [
-        "node_modules",
-        ".next",
-        ".git",
-        "test-results",
-        "playwright-report",
-        "blob-report",
-      ].includes(entry.name)
-    )
-      continue;
-    const full = path.join(directory, entry.name);
-    if (entry.isDirectory()) await walk(full);
-    else if (extensions.has(path.extname(entry.name))) files.push(full);
-  }
-}
-
-await walk(root);
-const failures = [];
 const checks = [
   [
     "production service configuration",
-    /process\.env\.(?:NEXT_PUBLIC_API_URL|API_PROXY_TARGET|DATABASE_URL|SUPABASE_[A-Z0-9_]+|POSTGRES_[A-Z0-9_]+)/i,
+    /\b(?:NEXT_PUBLIC_(?:(?:[A-Z0-9]+_)*(?:API|BACKEND|DATABASE|SUPABASE|POSTGRES|CRM)(?:_[A-Z0-9]+)*)|API_PROXY_TARGET|DATABASE_URL|SUPABASE_[A-Z0-9_]+|POSTGRES_[A-Z0-9_]+)\b/i,
   ],
   [
     "production service hostname",
@@ -39,35 +41,90 @@ const checks = [
   ],
   [
     "unapproved external domain",
-    /\b(?!(?:example\.com|w3\.org|nextjs\.org)\b)[a-z0-9-]+\.(?:com|net|org|co|io|ai)\b/i,
+    /\b(?!(?:example\.com|nextjs\.org|w3\.org)\b)[a-z0-9-]+\.(?:com|net|org|co|io|ai|dev|app|xyz|info|gov|edu|uk)\b/i,
   ],
-  ["native network fetch in the UI API module", /(?<!demo)\bfetch\s*\(/],
+  [
+    "native network transport in frontend source",
+    /\b(?:fetch|window\.fetch|globalThis\.fetch|XMLHttpRequest|WebSocket|EventSource)\s*\(|\bnavigator\.sendBeacon\s*\(/,
+  ],
 ];
 
-for (const file of files) {
-  if (path.resolve(file) === fileURLToPath(import.meta.url)) continue;
-  const content = await readFile(file, "utf8");
+export function inspectSource(content, filePath, root = appRoot) {
+  const absolutePath = path.isAbsolute(filePath) ? filePath : path.resolve(root, filePath);
+  const relativePath = path.relative(root, absolutePath).replaceAll(path.sep, "/");
+  const isChecker = absolutePath === scriptPath;
+  const isTest = /(?:^|\/)(?:e2e|tests?|__tests__)(?:\/|$)|\.(?:test|spec)\.[cm]?[jt]sx?$/.test(
+    relativePath,
+  );
+  const failures = [];
+
+  if (isChecker || isTest) return failures;
+
+  const sourceWithoutComments = content
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/(^|[^:\\])\/\/.*$/gm, "$1");
+
   for (const [label, pattern] of checks) {
-    if (
-      label === "native network fetch in the UI API module" &&
-      path.resolve(file) !== path.join(appRoot, "lib", "api.ts")
-    )
-      continue;
-    const match = pattern.exec(content);
-    if (match) failures.push(`${path.relative(root, file)}: ${label} (${match[0]})`);
+    if (label === "native network transport in frontend source" && isTest) continue;
+    const input =
+      label === "native network transport in frontend source" ? sourceWithoutComments : content;
+    const match = pattern.exec(input);
+    if (match)
+      failures.push(`${path.relative(repositoryRoot, absolutePath)}: ${label} (${match[0]})`);
+  }
+
+  return failures;
+}
+
+export function inspectDependencies(packageJson) {
+  const dependencyGroups = [
+    packageJson.dependencies,
+    packageJson.devDependencies,
+    packageJson.optionalDependencies,
+    packageJson.peerDependencies,
+  ];
+  return dependencyGroups.flatMap((group) =>
+    Object.keys(group ?? {})
+      .filter((name) => /^(?:@supabase\/|pg$|postgres$|asyncpg$)/i.test(name))
+      .map((name) => `package.json: prohibited backend dependency ${name}`),
+  );
+}
+
+async function walk(directory, files) {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    if (ignoredDirectories.has(entry.name)) continue;
+    if (entry.name === "package-lock.json") continue;
+
+    const fullPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) await walk(fullPath, files);
+    else if (extensions.has(path.extname(entry.name))) files.push(fullPath);
   }
 }
 
-const packageJson = JSON.parse(await readFile(path.join(appRoot, "package.json"), "utf8"));
-for (const name of Object.keys({ ...packageJson.dependencies, ...packageJson.devDependencies })) {
-  if (/^(?:@supabase\/|pg$|postgres$|asyncpg$)/i.test(name))
-    failures.push(`package.json: prohibited backend dependency ${name}`);
+async function run() {
+  const files = [];
+  const failures = [];
+  await Promise.all(
+    [appRoot, path.join(repositoryRoot, "design-system")].map((root) => walk(root, files)),
+  );
+
+  for (const file of files) {
+    const content = await readFile(file, "utf8");
+    failures.push(...inspectSource(content, file, repositoryRoot));
+  }
+
+  const packageJson = JSON.parse(await readFile(path.join(appRoot, "package.json"), "utf8"));
+  failures.push(...inspectDependencies(packageJson));
+
+  if (failures.length) {
+    console.error("Demo boundary check failed:");
+    for (const failure of failures) console.error(`- ${failure}`);
+    process.exitCode = 1;
+  } else {
+    console.log(
+      `Demo boundary check passed (${files.length} frontend and design-system files scanned).`,
+    );
+  }
 }
 
-if (failures.length) {
-  console.error("Demo boundary check failed:");
-  for (const failure of failures) console.error(`- ${failure}`);
-  process.exitCode = 1;
-} else {
-  console.log(`Demo boundary check passed (${files.length} source/config files scanned).`);
-}
+if (process.argv[1] && path.resolve(process.argv[1]) === scriptPath) await run();

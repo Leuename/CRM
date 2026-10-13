@@ -13,7 +13,8 @@
     "format:check": "prettier --check .",
     "test:unit": "vitest run",
     "check:demo": "node scripts/check-demo-boundaries.mjs",
-    "test:check": "npm run check:demo && npm run test:unit"
+    "test:boundary-guard": "node --test scripts/check-demo-boundaries.test.mjs",
+    "test:check": "npm run check:demo && npm run test:boundary-guard && npm run test:unit"
   },
   "dependencies": {
     "next": "^16.4.0",

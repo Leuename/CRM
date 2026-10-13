@@ -16,7 +16,7 @@ The following local checks passed on October 13, 2026:
 - Route parity audit: source and demo have the same 32 page paths; all 49 frontend API request templates map to the in-browser simulator.
 - A local production-build screenshot sweep captured the 31 login, CRM, and kiosk paths other than `/` at 1440×900 and 390×844 (62 screenshots). Every page returned HTTP 200 with no page errors, off-origin requests, or document-width overflow; Playwright separately verifies the root redirect. Full comparison with the source UI remains open.
 - Mobile Lighthouse after the logo-link fix: sign-in and dashboard each scored 100 for accessibility, best practices, SEO, and agentic browsing, with no failed audits.
-- Current staged-tree Gitleaks scan: 0 leaks across 1.26 MB; repeat after the pending framework security update and before publishing.
+- Candidate commit Gitleaks scan: 0 leaks across 1.26 MB; repeat after the pending framework security update and before publishing.
 
 The full dependency audit reports 5 High findings in the build-time ESLint dependency chain ending in `braces@3.0.3`. Its automatic fix proposes an incompatible ESLint configuration downgrade. Recheck for a compatible fix before release; see [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm).
 

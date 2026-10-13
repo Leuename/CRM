@@ -26,7 +26,7 @@ The app is for demonstration only. The forms accept arbitrary text, which could 
 - Recheck the full dependency audit. It currently reports five High findings in the build-time ESLint dependency chain through `braces@3.0.3`; the advisory has no patched version at this time.
 - Finish the route-by-route visual comparison, full keyboard pass, and manual screen-reader review.
 - Create or import the hosting project, deploy the verified build, and confirm public requests, sign-in roles, CRUD flows, and per-tab isolation.
-- The current staged-tree Gitleaks scan found 0 leaks across 1.26 MB; repeat it after the pending framework security update and immediately before publishing.
+- The candidate commit passed Gitleaks on `2026-10-13`: 0 leaks across 1.26 MB. Repeat the scan after the pending framework security update and immediately before publishing.
 
 No public deployment has been verified yet. The local preview runs at `http://127.0.0.1:6969/login`.
 

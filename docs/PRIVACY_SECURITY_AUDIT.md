@@ -17,7 +17,7 @@ The seed uses fictional identities and organizations, `.example` email domains, 
 
 `npm run check:demo` scans frontend source/configuration for selected production service variables and hostnames, non-example external domains, native fetch in the UI API module, and database client dependencies. It passed on the current code. This is a focused guard, not a general-purpose secret scanner.
 
-The exact staged-tree Gitleaks scan passed on `2026-10-13`: 0 leaks found across approximately 1.26 MB. A broad working-tree scan found 14 generic-key pattern matches in Next-generated `.next` manifests/chunks only; those build artifacts are ignored by Git and excluded from publication. Rerun Gitleaks after the pending framework security update and against the final staged files immediately before publishing.
+Gitleaks passed on the candidate commit on `2026-10-13`: 0 leaks found across approximately 1.26 MB. A broad working-tree scan found 14 generic-key pattern matches in Next-generated `.next` manifests/chunks only; those build artifacts are ignored by Git and excluded from publication. Rerun Gitleaks after the pending framework security update and against the final commit immediately before publishing.
 
 A source and documentation search for the remaining original-business schema names returned no matches after neutral service terminology was applied.
 

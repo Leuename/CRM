@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useId, useRef } from "react";
 import Link from "next/link";
 import type { Contact, DuplicateMatch } from "@/lib/api";
 import { Button, Input } from "@/lib/ds";
@@ -50,6 +51,12 @@ export function SectionContact({
   fieldErrors: Record<string, string>;
 }) {
   const selectValue = contactMode === "new" ? NEW_CONTACT_VALUE : contactId;
+  const contactErrorId = useId();
+  const contactSelectRef = useRef<HTMLSelectElement>(null);
+
+  useEffect(() => {
+    if (fieldErrors.primary_contact_id) contactSelectRef.current?.focus();
+  }, [fieldErrors]);
 
   return (
     <Section index={2} title="Contact" subtitle="Who is your main point of contact?">
@@ -61,8 +68,11 @@ export function SectionContact({
           <span className="sr-only">Contact</span>
           <span className="crm-field-control">
             <select
+              ref={contactSelectRef}
               className="crm-field-box opp-contact-select"
               value={selectValue}
+              aria-invalid={fieldErrors.primary_contact_id ? true : undefined}
+              aria-describedby={fieldErrors.primary_contact_id ? contactErrorId : undefined}
               disabled={contacts === null}
               onChange={(e) => onPickContact(e.target.value)}
             >
@@ -105,7 +115,9 @@ export function SectionContact({
         </p>
       )}
       {fieldErrors.primary_contact_id && (
-        <div style={fieldErrStyle}>{fieldErrors.primary_contact_id}</div>
+        <div id={contactErrorId} style={fieldErrStyle}>
+          {fieldErrors.primary_contact_id}
+        </div>
       )}
 
       {contactMode === "new" && (

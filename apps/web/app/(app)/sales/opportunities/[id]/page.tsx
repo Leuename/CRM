@@ -153,12 +153,11 @@ function OpportunityDetailView({
 
   return (
     <div style={{ paddingTop: 28 }}>
-      {/* The same header the form pages carry (visual reference):
-          breadcrumb + back button on one row, then the h1 and one subtitle
-          line. There is no mock for this page, so it borrows its neighbour's. */}
+      {/* The shared opportunity header puts this record under the section H1. */}
       <OpportunityFormHeader
         crumb={opportunity.title}
         title={opportunity.title}
+        titleLevel={2}
         subtitle={
           <>
             {"Contact: "}

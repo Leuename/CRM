@@ -1,64 +1,64 @@
 /* Aster CRM demo theme. Brand colors are centralized here; layout tokens stay intact. */
-:root{
+:root {
   /* Primary */
-  --primary:#4058C8;
-  --primary-dark:#202A52;
-  --primary-grey:#59647B;
-  --dark:#182038;
+  --primary: #4058c8;
+  --primary-dark: #202a52;
+  --primary-grey: #59647b;
+  --dark: #182038;
 
   /* Secondary — harmonised with the blue primary */
-  --secondary-violet:#7552C8;
-  --secondary-cyan:#2D96A7;
-  --secondary-grey:#59647B;
-  --secondary-red:#BB495B;
-  --secondary-blue:#315FC7;
-  --secondary-yellow:#B7791F;
-  --secondary-magenta:#AA4F93;
-  --secondary-indigo:#4D5D9C;
+  --secondary-violet: #7552c8;
+  --secondary-cyan: #2d70c8;
+  --secondary-grey: #59647b;
+  --secondary-red: #bb495b;
+  --secondary-blue: #315fc7;
+  --secondary-yellow: #b7791f;
+  --secondary-magenta: #aa4f93;
+  --secondary-indigo: #4d5d9c;
 
   /* Backgrounds & outlines */
-  --bg-app:#F4F6FB;
-  --bg-surface:#FFFFFF;
-  --outline-resting:#DCE2EF;
-  --outline:#E1E6F0;
-  --outline-white:#FFFFFF;
-  --outline-hairline:#E9ECF4;
-  --outline-strong:#CFD6E7;
-  --neutral-300:#CFD6E7;
-  --neutral-500:#667085;
-  --slate-700:#44506D;
-  --slate-800:#28324F;
+  --bg-app: #f4f6fb;
+  --bg-surface: #ffffff;
+  --outline-resting: #dce2ef;
+  --outline: #e1e6f0;
+  --outline-white: #ffffff;
+  --outline-hairline: #e9ecf4;
+  --outline-strong: #cfd6e7;
+  --neutral-300: #cfd6e7;
+  --neutral-500: #667085;
+  --slate-700: #44506d;
+  --slate-800: #28324f;
 
   /* Overlays — darken by layering the ink colour, never by hue shift */
-  --overlay-hover:rgba(24,32,56,0.35);
-  --overlay-press:rgba(24,32,56,0.10);
-  --primary-tint-10:rgba(64,88,200,0.10);
+  --overlay-hover: rgba(24, 32, 56, 0.35);
+  --overlay-press: rgba(24, 32, 56, 0.1);
+  --primary-tint-10: rgba(64, 88, 200, 0.1);
 
   /* Semantic aliases */
-  --text-primary:var(--dark);
-  --text-secondary:var(--primary-grey);
-  --text-muted:var(--neutral-500);
-  --text-inverse:#FFFFFF;
-  --text-link:var(--primary);
-  --surface-card:var(--bg-surface);
-  --surface-page:var(--bg-app);
-  --surface-sunken:#F8F9FC;
-  --border-card:var(--outline-resting);
-  --status-success:var(--secondary-blue);
-  --status-warning:var(--secondary-yellow);
-  --status-danger:var(--secondary-red);
-  --status-info:var(--secondary-cyan);
-  --focus-ring:var(--primary);
+  --text-primary: var(--dark);
+  --text-secondary: var(--primary-grey);
+  --text-muted: var(--neutral-500);
+  --text-inverse: #ffffff;
+  --text-link: var(--primary);
+  --surface-card: var(--bg-surface);
+  --surface-page: var(--bg-app);
+  --surface-sunken: #f8f9fc;
+  --border-card: var(--outline-resting);
+  --status-success: var(--secondary-blue);
+  --status-warning: var(--secondary-yellow);
+  --status-danger: var(--secondary-red);
+  --status-info: var(--secondary-cyan);
+  --focus-ring: var(--primary);
 
   /* Pipeline stage colours — pipeline_stages seed keywords mapped to this palette */
-  --stage-slate:var(--primary-grey);
-  --stage-cyan:var(--secondary-cyan);
-  --stage-orange:#BE6D42;
-  --stage-yellow:var(--secondary-yellow);
-  --stage-purple:var(--secondary-magenta);
-  --stage-blue:var(--secondary-blue);
-  --stage-indigo:var(--secondary-indigo);
-  --stage-red:var(--secondary-red);
+  --stage-slate: var(--primary-grey);
+  --stage-cyan: var(--secondary-cyan);
+  --stage-orange: #be6d42;
+  --stage-yellow: var(--secondary-yellow);
+  --stage-purple: var(--secondary-magenta);
+  --stage-blue: var(--secondary-blue);
+  --stage-indigo: var(--secondary-indigo);
+  --stage-red: var(--secondary-red);
 
   /* Pastel card fills for the pipeline board (visual reference): the stage hue
      laid over white. The percentage is tuned per hue, not shared — the warm hues
@@ -68,25 +68,25 @@
      The hex below are those color-mix results snapshotted (Chrome, sRGB) so engines
      without color-mix still fill the cards; the @supports block re-declares the live
      color-mix versions for engines that have it. */
-  --stage-tint-slate:#f3f4f8;
-  --stage-tint-cyan:#edf7f8;
-  --stage-tint-orange:#f8eee8;
-  --stage-tint-yellow:#fbf6ed;
-  --stage-tint-purple:#f5f0fa;
-  --stage-tint-blue:#edf1ff;
-  --stage-tint-indigo:#eff0fa;
-  --stage-tint-red:#fbf0f2;
+  --stage-tint-slate: #f3f4f8;
+  --stage-tint-cyan: #edf1ff;
+  --stage-tint-orange: #f8eee8;
+  --stage-tint-yellow: #fbf6ed;
+  --stage-tint-purple: #f5f0fa;
+  --stage-tint-blue: #edf1ff;
+  --stage-tint-indigo: #eff0fa;
+  --stage-tint-red: #fbf0f2;
 }
 
-@supports (color: color-mix(in oklch, red 10%, white)){
-  :root{
-    --stage-tint-slate:color-mix(in oklch, var(--stage-slate) 8%, white);
-    --stage-tint-cyan:color-mix(in oklch, var(--stage-cyan) 9%, white);
-    --stage-tint-orange:color-mix(in oklch, var(--stage-orange) 14%, white);
-    --stage-tint-yellow:color-mix(in oklch, var(--stage-yellow) 9%, white);
-    --stage-tint-purple:color-mix(in oklch, var(--stage-purple) 9%, white);
-    --stage-tint-blue:color-mix(in oklch, var(--stage-blue) 8%, white);
-    --stage-tint-indigo:color-mix(in oklch, var(--stage-indigo) 9%, white);
-    --stage-tint-red:color-mix(in oklch, var(--stage-red) 9%, white);
+@supports (color: color-mix(in oklch, red 10%, white)) {
+  :root {
+    --stage-tint-slate: color-mix(in oklch, var(--stage-slate) 8%, white);
+    --stage-tint-cyan: color-mix(in oklch, var(--stage-cyan) 9%, white);
+    --stage-tint-orange: color-mix(in oklch, var(--stage-orange) 14%, white);
+    --stage-tint-yellow: color-mix(in oklch, var(--stage-yellow) 9%, white);
+    --stage-tint-purple: color-mix(in oklch, var(--stage-purple) 9%, white);
+    --stage-tint-blue: color-mix(in oklch, var(--stage-blue) 8%, white);
+    --stage-tint-indigo: color-mix(in oklch, var(--stage-indigo) 9%, white);
+    --stage-tint-red: color-mix(in oklch, var(--stage-red) 9%, white);
   }
 }

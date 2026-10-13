@@ -2,18 +2,19 @@
 
 import Link from "next/link";
 
-// The content header of visual reference: breadcrumb + back link on
-// one row, then the h1 and its subtitle. The TopBar already says
-// "Opportunities", so this h1 names the task rather than repeating the section
-// (global-constraints §"Do not duplicate the page h1").
+// Breadcrumb + back link, followed by the subpage title and subtitle. The
+// TopBar is the section H1; nested opportunity routes use an H2 for their title.
 export function OpportunityFormHeader({
   crumb,
   title,
+  titleLevel = 1,
   subtitle,
   back,
 }: {
   crumb: string;
   title: string;
+  // Nested opportunity routes sit under the Opportunities TopBar heading.
+  titleLevel?: 1 | 2;
   // A node, not a string: the detail page's subtitle carries contact/company links.
   subtitle: React.ReactNode;
   back: React.ReactNode;
@@ -28,7 +29,11 @@ export function OpportunityFormHeader({
         </nav>
         {back}
       </div>
-      <h1 className="opp-page-title">{title}</h1>
+      {titleLevel === 1 ? (
+        <h1 className="opp-page-title">{title}</h1>
+      ) : (
+        <h2 className="opp-page-title">{title}</h2>
+      )}
       <p className="opp-page-sub">{subtitle}</p>
     </header>
   );

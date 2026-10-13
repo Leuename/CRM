@@ -10,6 +10,7 @@ export default function NewOpportunityPage() {
       <OpportunityFormHeader
         crumb="New opportunity"
         title="New opportunity"
+        titleLevel={2}
         subtitle="Capture key details to start tracking this opportunity."
         back={
           <Link href="/sales/opportunities" className="opp-page-back">

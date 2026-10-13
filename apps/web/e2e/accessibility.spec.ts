@@ -106,7 +106,15 @@ test("CRM detail tabs expose selection, panel relationships, and arrow-key navig
   await page.goto("/login");
   await page.getByRole("button", { name: "Sign in to demo" }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
+  await page.goto("/sales/opportunities/new");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+  await expect(page.getByRole("heading", { level: 1, name: "Opportunities" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "New opportunity" })).toBeVisible();
+
   await page.goto("/sales/opportunities/opportunity_01");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+  await expect(page.getByRole("heading", { level: 1, name: "Opportunities" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2 }).first()).toBeVisible();
 
   const tablist = page.getByRole("tablist", { name: "Opportunity sections" });
   const overview = tablist.getByRole("tab", { name: "Overview" });

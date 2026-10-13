@@ -23,7 +23,7 @@ The app is for demonstration only. The forms accept arbitrary text, which could 
 
 ## Before a public launch
 
-- Apply the relevant Next.js security update announced for October 14, 2026, and rerun the full release checks. The installed dependency is Next.js 16.4.0; the upstream advisories and fixed versions are not published yet. See [deployment notes](DEPLOYMENT.md).
+- As of `2026-10-14T00:11:12+08:00`, the official Next.js security update scheduled for October 14 had not yet appeared in the release sources checked; affected versions and upgrade instructions remain pending. Hold production launch until official guidance is available, apply any required upgrade, and rerun the full release checks. The candidate uses Next.js 16.4.0. See the [official announcement](https://nextjs.org/blog/upcoming-nextjs-security-update-october-2026) and [deployment notes](DEPLOYMENT.md).
 - Targeted accessibility checks passed for inquiry-step focus and announcement, row-specific archive names, CRM detail-tab semantics and arrow navigation, kiosk calendar tab-panel relationships, service description keyboard behavior, skip-link navigation, kiosk main landmarks and one h1 per route, dashboard inquiry labels, and the individual-contact heading. Mobile Lighthouse passed after labeling the compact Aster dashboard link: sign-in and dashboard both scored 100 in accessibility, best practices, SEO, and agentic browsing, with zero failed audits. Actual spoken screen-reader output remains unverified because Narrator was not running and speech cannot be captured here. Full keyboard coverage and signed-in route visual comparison remain open.
 - Recheck the full dependency audit. It currently reports five High findings in the build-time ESLint dependency chain through `braces@3.0.3`; the advisory has no patched version at this time.
 - Finish the source-to-demo visual comparison for signed-in routes, full keyboard pass, and manual spoken screen-reader review.
@@ -31,9 +31,9 @@ The app is for demonstration only. The forms accept arbitrary text, which could 
 - The candidate commit passed Gitleaks on `2026-10-13`: 0 leaks across 1.26 MB. Repeat the scan after the pending framework security update and immediately before publishing.
 - The current source-only Gitleaks scan reported 0 leaks across 1.03 MB after excluding installed dependencies and generated build output. A broad scan reported 16 generic API-key matches, all in Git-ignored `.next` output; redacted path review identified generated Next.js preview and server-action metadata, not source files.
 
-## Vercel status
+## Hosted status
 
-- The hosted deployment has not been verified against the current source. Keep previews protected and do not share a preview or branch alias as the public demo URL; verify anonymous access at the eventual public URL.
-- No public deployment verifies the current workspace. Confirm and configure a publicly accessible URL, then verify the deployed SHA and visitor flows.
+- As of `2026-10-14T00:11:12+08:00`, the current candidate is a ready preview protected by Vercel SSO; anonymous requests redirect to SSO. Its branch build uses `apps/web` and includes the sibling `design-system`.
+- Production is not live. Keep previews protected and do not share a preview or branch alias as the public demo URL. After the security update and release gates, verify the deployed source and visitor flows at the eventual public URL.
 
 See [release readiness](RELEASE_READINESS.md), [test plan](TEST_PLAN.md), and [attributions](../ATTRIBUTIONS.md) for detail.

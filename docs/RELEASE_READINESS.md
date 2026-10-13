@@ -13,7 +13,7 @@ The following local checks passed on October 13, 2026:
 - TypeScript, ESLint, and the demo-boundary scan (160 application and design-system source/config files).
 - 13 unit tests, including dashboard stage filtering, creation/close-period semantics, dense revenue windows, null-source drilldown, and blue legacy-stage color behavior.
 - Optimized Next.js build with all 32 routes generated.
-- 20 Playwright tests passed against the current production build on port 6969 with one worker, including all CRM list/detail/create/edit and settings routes, legacy redirects, sign-in validation announcements, kiosk routes, same-origin requests, URL safety, per-tab isolation, phone-width controls, pagination visibility, page navigation, and disabled boundary states. Accessibility coverage includes kiosk calendar and CRM detail-tab keyboard navigation, tab-panel relationships, inquiry-step announcements and focus, row-specific archive action names, skip links, landmarks, and the tablet login brand panel. The default six-worker run exceeded available Chromium memory; the serial run passed all 20.
+- 20 Playwright tests passed against the current production build on port 6969 with one worker, including all CRM list/detail/create/edit and settings routes, legacy redirects, sign-in validation announcements, kiosk routes, same-origin requests, URL safety, per-tab isolation, phone-width controls, pagination visibility, page navigation, and disabled boundary states. Accessibility coverage includes kiosk calendar and CRM detail-tab keyboard navigation, tab-panel relationships, inquiry-step announcements and focus, row-specific archive action names, skip links, landmarks, and the tablet login brand panel. The default six-worker run exceeded available Chromium memory; the serial run passed all 20. These runs predate the demo sign-in loading test; the suite now has 21 tests and needs a fresh `npm run e2e` run.
 - Production dependency audit: 0 advisories.
 - Route parity audit: source and demo have the same 32 page paths; all 49 frontend API request templates map to the in-browser simulator.
 - A local production-build screenshot sweep captured the 31 login, CRM, and kiosk paths other than `/` at 1440×900 and 390×844 (62 screenshots). Every page returned HTTP 200 with no page errors, off-origin requests, or document-width overflow; Playwright separately verifies the root redirect. Full comparison with the source UI remains open.
@@ -28,12 +28,11 @@ The manual browser pass covered 1440×900, 1024×768, 768×1024, 390×844, and a
 
 The hosted deployment has not been verified against the current source. Existing previews stay behind deployment protection, and no preview or branch alias should be shared as the public demo URL. The app lives in `apps/web` and imports the sibling `design-system`, so the hosted build must include both.
 
-At `2026-10-13T14:43Z`, a fresh Next.js 16.4.0 production build completed and generated all 26 routes. The rebuilt production server is running on the requested port 6969, and all 20 Playwright tests passed against it with one worker. The default six-worker run exceeded available Chromium memory; the serial run passed. Port 6975 is no longer used for local verification.
-
 ## Public-release gates
 
 - Review and apply the Next.js security update planned for October 14, 2026, then rerun dependency audits and all release checks. See [the official announcement](https://nextjs.org/blog/upcoming-nextjs-security-update-october-2026) and [deployment notes](DEPLOYMENT.md).
 - Recheck the current full dependency audit; its five High findings are in the build-time ESLint chain, and the advisory has no compatible patched version in the current lockfile.
+- Run `npm run e2e` (it builds and serves its own production server on free port 6969) and record the 21-test result.
 - Inspect the final staged asset list and keep it aligned with [the documented attributions](../ATTRIBUTIONS.md).
 - Complete source-to-demo visual comparison for the signed-in routes, and verify spoken announcements with a screen reader. The current candidate-only 1280×720 route pass, keyboard checks, and Lighthouse results do not replace those checks.
 - Confirm the hosting project and public hostname, keep previews protected, and verify anonymous visitor access at the eventual public URL.

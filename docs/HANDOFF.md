@@ -21,8 +21,8 @@ This is a demo only. Visitors can type arbitrary text, so persistent notices on 
 
 ## Public release status
 
-As of `2026-10-14T07:37:54+08:00` (Manila), Next.js still describes its October 14 security update as upcoming. The announcement describes two Critical and one High upstream dependency vulnerabilities, but affected ranges and upgrade instructions are not yet published. Check the official [announcement](https://nextjs.org/blog/upcoming-nextjs-security-update-october-2026) and [advisories](https://github.com/vercel/next.js/security/advisories), map the update to the candidate's Next.js 16.4.0, and apply any required fix before launch.
+As of `2026-10-14T07:39:59+08:00` (Manila), Next.js still describes its October 14 security update as upcoming. The announcement describes two Critical and one High upstream dependency vulnerabilities, but affected ranges and upgrade instructions are not yet published. Check the official [announcement](https://nextjs.org/blog/upcoming-nextjs-security-update-october-2026) and [advisories](https://github.com/vercel/next.js/security/advisories), map the update to the candidate's Next.js 16.4.0, and apply any required fix before launch.
 
-Vercel reports `live=false`; SSO protection covers all deployments. PR #1 remains open at commit `bfea2677364fb61ceb93a8cd98f6125bbb965aae`; its latest preview is READY and both Vercel checks passed. Production is not live and has no public production URL. Keep previews protected, then publish only after the security update is evaluated and confirm public sign-in, synthetic CRUD flows, same-origin network behavior, and per-tab isolation.
+Vercel reports `live=false`; SSO protection covers all deployments. PR #1 remains open; its latest preview is READY and both Vercel checks passed. Production is not live and has no public production URL. Keep previews protected, then publish only after the security update is evaluated and confirm public sign-in, synthetic CRUD flows, same-origin network behavior, and per-tab isolation.
 
 See [release readiness](RELEASE_READINESS.md), [test plan](TEST_PLAN.md), and [attributions](../ATTRIBUTIONS.md) for detail.

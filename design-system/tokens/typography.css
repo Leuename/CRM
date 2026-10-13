@@ -1,0 +1,31 @@
+/* Type scale — Lato throughout the product UI. Sizes are exactly as drawn. */
+:root{
+  --text-h1-size:32px;   --text-h1-line:48px;   --text-h1-weight:700;
+  --text-h2-size:26px;   --text-h2-line:38px;   --text-h2-weight:700;
+  --text-h3-size:22px;   --text-h3-line:32px;   --text-h3-weight:700;
+  --text-h4-size:20px;   --text-h4-line:32px;   --text-h4-weight:700;
+  --text-h5-size:18px;   --text-h5-line:26px;   --text-h5-weight:700;
+  --text-h15-size:16px;  --text-h15-line:24px;  --text-h15-weight:700;
+
+  --text-body-size:14px;      --text-body-line:21px;   --text-body-weight:400;
+  --text-body-bold-weight:700;
+  --text-secondary-size:12px; --text-secondary-line:18px;
+  --text-button-size:14px;    --text-button-line:17px; --text-button-weight:700;
+  --text-button-sm-size:12px;
+  --text-light-weight:300;
+  --text-black-weight:900;
+
+  --letter-spacing-welcome:0.4px;
+}
+
+.craft-h1{font:var(--text-h1-weight) var(--text-h1-size)/var(--text-h1-line) var(--font-ui);color:var(--text-primary)}
+.craft-h2{font:var(--text-h2-weight) var(--text-h2-size)/var(--text-h2-line) var(--font-ui);color:var(--text-primary)}
+.craft-h3{font:var(--text-h3-weight) var(--text-h3-size)/var(--text-h3-line) var(--font-ui);color:var(--text-primary)}
+.craft-h4{font:var(--text-h4-weight) var(--text-h4-size)/var(--text-h4-line) var(--font-ui);color:var(--text-primary)}
+.craft-h5{font:var(--text-h5-weight) var(--text-h5-size)/var(--text-h5-line) var(--font-ui);color:var(--text-primary)}
+.craft-h15{font:var(--text-h15-weight) var(--text-h15-size)/var(--text-h15-line) var(--font-ui);color:var(--text-primary)}
+.craft-body{font:400 14px/21px var(--font-ui);color:var(--text-primary)}
+.craft-body-bold{font:700 14px/21px var(--font-ui);color:var(--text-primary)}
+.craft-secondary{font:400 12px/18px var(--font-ui);color:var(--text-secondary)}
+.craft-secondary-bold{font:700 12px/18px var(--font-ui);color:var(--text-secondary)}
+.craft-button-label{font:700 14px/17px var(--font-ui)}

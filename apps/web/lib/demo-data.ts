@@ -1,0 +1,522 @@
+/** Fictional, deterministic records for the public Aster CRM demo. */
+export const DEMO_USERS = [
+  {
+    id: "user_aster_admin",
+    email: "admin@aster.example",
+    display_name: "Morgan Lee",
+    role: "ADMIN",
+  },
+  {
+    id: "user_aster_manager",
+    email: "manager@aster.example",
+    display_name: "Jordan Rivera",
+    role: "MANAGER",
+  },
+  {
+    id: "user_aster_sales",
+    email: "sales@aster.example",
+    display_name: "Casey Brooks",
+    role: "SALES",
+  },
+  {
+    id: "user_aster_finance",
+    email: "finance@aster.example",
+    display_name: "Taylor Quinn",
+    role: "FINANCE",
+  },
+  {
+    id: "user_aster_operations",
+    email: "desk@aster.example",
+    display_name: "Riley Chen",
+    role: "OPERATIONS",
+  },
+  {
+    id: "user_aster_triage",
+    email: "triage@aster.example",
+    display_name: "Avery Patel",
+    role: "TRIAGE",
+  },
+];
+
+export const DEMO_STAGES = [
+  {
+    id: "stage_inquiry",
+    name: "New Inquiry",
+    semantic_type: "ACTIVE",
+    probability: 10,
+    sort_order: 1,
+    color: "slate",
+    active: true,
+  },
+  {
+    id: "stage_qualified",
+    name: "Qualified",
+    semantic_type: "ACTIVE",
+    probability: 20,
+    sort_order: 2,
+    color: "cyan",
+    active: true,
+  },
+  {
+    id: "stage_discovery",
+    name: "Discovery / Scoping",
+    semantic_type: "ACTIVE",
+    probability: 35,
+    sort_order: 3,
+    color: "orange",
+    active: true,
+  },
+  {
+    id: "stage_proposal",
+    name: "Proposal Sent",
+    semantic_type: "ACTIVE",
+    probability: 55,
+    sort_order: 4,
+    color: "yellow",
+    active: true,
+  },
+  {
+    id: "stage_negotiation",
+    name: "Negotiation",
+    semantic_type: "ACTIVE",
+    probability: 75,
+    sort_order: 5,
+    color: "purple",
+    active: true,
+  },
+  {
+    id: "stage_confirmed",
+    name: "Verbal Confirmation",
+    semantic_type: "ACTIVE",
+    probability: 90,
+    sort_order: 6,
+    color: "blue",
+    active: true,
+  },
+  {
+    id: "stage_won",
+    name: "Won",
+    semantic_type: "WON",
+    probability: 100,
+    sort_order: 7,
+    color: "indigo",
+    active: true,
+  },
+  {
+    id: "stage_lost",
+    name: "Lost",
+    semantic_type: "LOST",
+    probability: 0,
+    sort_order: 8,
+    color: "red",
+    active: true,
+  },
+];
+
+const firstNames = [
+  "Amara",
+  "Noah",
+  "Elena",
+  "Miles",
+  "Sofia",
+  "Theo",
+  "Nina",
+  "Elliot",
+  "Maya",
+  "Leo",
+  "Iris",
+  "Owen",
+  "Lena",
+  "Kai",
+  "Zara",
+  "Ezra",
+  "Mina",
+  "Arlo",
+  "Ada",
+  "Jules",
+  "Remy",
+  "Cleo",
+  "Finn",
+  "Esme",
+  "Ari",
+  "Luca",
+  "Tess",
+  "Rory",
+  "Indie",
+  "Sam",
+];
+const lastNames = [
+  "Bennett",
+  "Carter",
+  "Diaz",
+  "Ellis",
+  "Foster",
+  "Green",
+  "Hayes",
+  "Ibrahim",
+  "James",
+  "Kim",
+  "Lane",
+  "Morris",
+  "Nguyen",
+  "Owens",
+  "Park",
+  "Reed",
+  "Shah",
+  "Turner",
+  "Vale",
+  "Wong",
+];
+const companyNames = [
+  "Juniper & Co.",
+  "Northstar Learning",
+  "Cedarfield Studio",
+  "Brightline Analytics",
+  "Morrow Health Group",
+  "Common Thread Design",
+  "Silver Fern Labs",
+  "Harborlight Ventures",
+  "Bluebird Advisory",
+  "Goodway Collective",
+  "Lumen Works",
+  "Pinecone Systems",
+  "Daybreak Creative",
+  "Atlas Grove",
+  "Kindred Finance",
+  "Openwater Research",
+];
+const industries = [
+  "Technology",
+  "Education",
+  "Professional Services",
+  "Healthcare",
+  "Design",
+  "Finance",
+  "Media",
+  "Nonprofit",
+];
+const leadSources = ["Website", "Referral", "Consultation", "Partner", "Webinar"];
+const productsSeed = [
+  [
+    "Strategy Sprint",
+    "Strategy & advisory",
+    "A two-week planning engagement with a clear delivery roadmap",
+    "4800.00",
+    "project",
+  ],
+  [
+    "Executive Briefing",
+    "Strategy & advisory",
+    "A focused working session to align leadership on priorities",
+    "950.00",
+    "session",
+  ],
+  [
+    "Customer Journey Review",
+    "Strategy & advisory",
+    "A research-led review of customer journeys and friction points",
+    "3200.00",
+    "project",
+  ],
+  [
+    "Growth Planning",
+    "Strategy & advisory",
+    "Quarterly planning support for a growing team",
+    "1800.00",
+    "quarter",
+  ],
+  [
+    "Operating Model Review",
+    "Strategy & advisory",
+    "A practical assessment of processes, roles, and handoffs",
+    "4200.00",
+    "project",
+  ],
+  [
+    "CRM Implementation",
+    "Systems & analytics",
+    "Configuration, migration, and team onboarding for your CRM",
+    "5600.00",
+    "project",
+  ],
+  [
+    "Data Quality Assessment",
+    "Systems & analytics",
+    "A review of data quality, ownership, and reporting needs",
+    "2900.00",
+    "project",
+  ],
+  [
+    "Analytics Dashboard",
+    "Systems & analytics",
+    "A tailored reporting dashboard with a handover session",
+    "3800.00",
+    "project",
+  ],
+  [
+    "Automation Sprint",
+    "Systems & analytics",
+    "A targeted sprint to simplify repeatable team workflows",
+    "3400.00",
+    "project",
+  ],
+  [
+    "Insights Retainer",
+    "Systems & analytics",
+    "Monthly analysis and guidance for your reporting team",
+    "1450.00",
+    "month",
+  ],
+  [
+    "Team Enablement Workshop",
+    "Training & support",
+    "An interactive workshop to help teams adopt new processes",
+    "1800.00",
+    "session",
+  ],
+  [
+    "Leadership Coaching",
+    "Training & support",
+    "Monthly coaching sessions for team leads",
+    "1200.00",
+    "month",
+  ],
+  [
+    "Customer Success Playbook",
+    "Training & support",
+    "A tailored playbook for consistent customer follow-up",
+    "2200.00",
+    "project",
+  ],
+  [
+    "Launch Support",
+    "Training & support",
+    "Hands-on guidance through a planned product or service launch",
+    "2500.00",
+    "week",
+  ],
+  [
+    "Advisory Support Plan",
+    "Training & support",
+    "Ongoing guidance with a monthly working session",
+    "900.00",
+    "month",
+  ],
+];
+
+export function createDemoSeed(): object {
+  const iso = (day: number, hour = 9) =>
+    `2026-10-${String(day).padStart(2, "0")}T${String(hour).padStart(2, "0")}:00:00.000Z`;
+  const sources = leadSources.map((name, i) => ({
+    id: `source_${i + 1}`,
+    name,
+    active: true,
+    sort_order: i + 1,
+  }));
+  const companies = companyNames.map((name, i) => ({
+    id: `company_${String(i + 1).padStart(2, "0")}`,
+    name,
+    legal_name: `${name.replace(/[&,]/g, "").trim()} LLC`,
+    industry: industries[i % industries.length],
+    website: `https://www.${name.toLowerCase().replace(/[^a-z0-9]+/g, "")}.example`,
+    phone: `+1-202-555-${String(100 + i).padStart(4, "0")}`,
+    employee_count: 8 + i * 7,
+    contact_count: 0,
+    created_at: iso(Math.max(1, 2 + (i % 10))),
+    updated_at: iso(10 + (i % 4)),
+    archived_at: null,
+    billing_address: {
+      street: `${120 + i} Harbor Avenue`,
+      city: "Port Mason",
+      province: "Oregon",
+      postal_code: `97${String(100 + i)}`,
+      country: "United States",
+    },
+    notes: i % 4 === 0 ? "Prefers concise updates and a clear action plan." : null,
+  }));
+  const contacts = firstNames.map((first_name, i) => {
+    const company = companies[i % companies.length];
+    const last_name = lastNames[(i * 3) % lastNames.length];
+    return {
+      id: `contact_${String(i + 1).padStart(2, "0")}`,
+      first_name,
+      last_name,
+      email: `${first_name.toLowerCase()}.${last_name.toLowerCase()}${i + 1}@${company.name.toLowerCase().replace(/[^a-z0-9]+/g, "")}.example`,
+      phone: `+1-202-555-${String(100 + i).padStart(4, "0")}`,
+      position: [
+        "Operations Lead",
+        "Program Director",
+        "People Partner",
+        "Founder",
+        "Project Lead",
+      ][i % 5],
+      client_status: i % 4 === 0 ? "EXISTING_CLIENT" : "NEW_CLIENT",
+      company_id: company.id,
+      company_name: company.name,
+      source_id: sources[i % sources.length].id,
+      tags: [["strategy", "consultation"], ["team", "quarterly"], ["analytics"], ["follow-up"]][
+        i % 4
+      ],
+      created_at: iso(2 + (i % 10)),
+      updated_at: iso(10 + (i % 4)),
+      notes: i % 3 === 0 ? "Exploring ways to streamline customer onboarding this quarter." : null,
+      created_by: DEMO_USERS[[1, 2, 5][i % 3]].id,
+      archived_at: i === 29 ? iso(8) : null,
+    };
+  });
+  companies.forEach((company) => {
+    company.contact_count = contacts.filter(
+      (contact) => contact.company_id === company.id && !contact.archived_at,
+    ).length;
+  });
+  const products = productsSeed.map(([name, category, description, price, unit], i) => ({
+    id: `product_${String(i + 1).padStart(2, "0")}`,
+    name,
+    category,
+    description,
+    default_price: price,
+    price_unit: unit,
+    currency: "USD",
+    active: i !== 14,
+    created_at: iso(1 + (i % 12)),
+    updated_at: iso(11),
+  }));
+  const reps = ["Morgan Lee", "Jordan Rivera", "Casey Brooks", "Avery Patel"].map((name, i) => ({
+    id: `rep_${i + 1}`,
+    name,
+    active: true,
+    sort_order: i + 1,
+  }));
+  const opportunities = Array.from({ length: 28 }, (_, i) => {
+    const contact = contacts[(i * 7) % contacts.length];
+    const company = companies.find((c) => c.id === contact.company_id)!;
+    const product = products[(i * 3) % products.length];
+    const stage = DEMO_STAGES[[0, 1, 2, 3, 4, 5, 6, 7][i % 8]];
+    const amount = 480 + ((i * 173) % 4800);
+    const net = (amount * (1 + (i % 3))).toFixed(2);
+    const gross = (Number(net) * 1.08).toFixed(2);
+    const line = {
+      id: `line_${i + 1}`,
+      product_id: product.id,
+      product_name: product.name,
+      service_term: product.price_unit === "month" ? "MONTHLY" : "ONCE",
+      vat_exempt: false,
+      vat_amount: (Number(net) * 0.08).toFixed(2),
+      line_total_inc_vat: gross,
+      quantity: String(1 + (i % 4)),
+      unit_price: product.default_price,
+      discount_percent: i % 6 === 0 ? "5.00" : "0.00",
+      line_total: net,
+      notes: null,
+      start_date: "2026-11-01",
+      start_time: null,
+      end_date: "2027-10-31",
+      end_time: null,
+      preferred_schedule: "Weekdays, 9am–5pm",
+    };
+    return {
+      id: `opportunity_${String(i + 1).padStart(2, "0")}`,
+      reference: `INQ-${String(1001 + i)}`,
+      title: `${product.name} · ${contact.first_name} ${contact.last_name}`,
+      primary_contact_id: contact.id,
+      contact_name: `${contact.first_name} ${contact.last_name}`,
+      company_id: company.id,
+      company_name: company.name,
+      owner_id: DEMO_USERS[1 + (i % 2)].id,
+      owner_name: DEMO_USERS[1 + (i % 2)].display_name,
+      created_by: DEMO_USERS[[5, 1, 2][i % 3]].id,
+      stage_id: stage.id,
+      stage_name: stage.name,
+      stage_semantic_type: stage.semantic_type,
+      stage_color: stage.color,
+      probability: stage.probability,
+      expected_close_date: `2026-10-${String(14 + (i % 17)).padStart(2, "0")}`,
+      total_revenue_ex_vat: net,
+      total_revenue_inc_vat: gross,
+      currency: "USD",
+      created_at: iso(2 + (i % 10)),
+      updated_at: iso(11),
+      archived_at: null,
+      reopened: false,
+      team_size: 2 + (i % 12),
+      service_start_date: line.start_date,
+      service_end_date: line.end_date,
+      service_start_time: null,
+      service_end_time: null,
+      service_term: line.service_term,
+      vat_exempt: false,
+      sales_representative_id: reps[i % reps.length].id,
+      sales_representative_name: reps[i % reps.length].name,
+      service_term_text: null,
+      selling_price_ex_vat: net,
+      discount_percent: line.discount_percent,
+      notes: i % 5 === 0 ? "Interested in a flexible start date." : null,
+      closed_at: stage.semantic_type === "ACTIVE" ? null : iso(8 + (i % 4)),
+      loss_reason_id: stage.semantic_type === "LOST" ? "loss_timing" : null,
+      loss_reason_name: stage.semantic_type === "LOST" ? "Timing" : null,
+      loss_note: null,
+      source_id: contact.source_id,
+      product_id: product.id,
+      products: [line],
+      history: [
+        {
+          id: `history_${i + 1}`,
+          from_stage_id: null,
+          from_stage_name: null,
+          to_stage_id: stage.id,
+          to_stage_name: stage.name,
+          changed_by: DEMO_USERS[1].id,
+          changed_by_name: DEMO_USERS[1].display_name,
+          reason: "Demo seed record",
+          changed_at: iso(2 + (i % 10)),
+        },
+      ],
+    };
+  });
+  const activities = Array.from({ length: 42 }, (_, i) => {
+    const contact = contacts[(i * 5) % contacts.length];
+    const opportunity = opportunities[(i * 3) % opportunities.length];
+    const day = i < 6 ? 13 : 1 + (i % 12);
+    const hour = i < 6 ? 10 + i : 9 + (i % 8);
+    const types = ["CALL", "EMAIL", "MEETING", "SITE_VISIT", "NOTE"];
+    const author = DEMO_USERS[[1, 2, 5][i % 3]];
+    return {
+      id: `activity_${String(i + 1).padStart(2, "0")}`,
+      activity_type: types[i % types.length],
+      description: [
+        "Strategy consultation and priorities",
+        "Follow-up on an advisory proposal",
+        "Reviewed launch timing",
+        "Shared a data assessment overview",
+        "Confirmed team workshop objectives",
+      ][i % 5],
+      occurred_at: iso(day, hour),
+      contact_id: contact.id,
+      company_id: contact.company_id,
+      opportunity_id: opportunity.id,
+      created_by: author.id,
+      created_by_name: author.display_name,
+      created_at: iso(Math.max(1, day - 1), hour),
+    };
+  });
+  return {
+    version: 1,
+    user_id: null as string | null,
+    contacts,
+    companies,
+    products,
+    opportunities,
+    activities,
+    stages: structuredClone(DEMO_STAGES),
+    sources,
+    reps,
+    loss_reasons: [
+      { id: "loss_budget", name: "Budget", active: true, sort_order: 1 },
+      { id: "loss_timing", name: "Timing", active: true, sort_order: 2 },
+      { id: "loss_fit", name: "Service fit", active: true, sort_order: 3 },
+    ],
+    loss_reason_required: true,
+    audit: [],
+    consents: [],
+  };
+}

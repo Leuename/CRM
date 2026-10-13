@@ -1,0 +1,10 @@
+node_modules/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+.env*
+.vercel/
+test-results/
+playwright-report/
+blob-report/
+npm-debug.log*

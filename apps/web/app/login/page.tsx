@@ -63,6 +63,7 @@ export default function LoginPage() {
       if (err instanceof ApiError && err.status === 401) {
         setFormError("Invalid email or password");
       } else if (err instanceof ApiError && err.status === 429) {
+        // Show the rate-limit message as-is: it is deliberately a generic
         // one and says nothing about which tier fired; "something went wrong"
         // would send a locked-out rep re-typing a password that is correct.
         setFormError(err.message);

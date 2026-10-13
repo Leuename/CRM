@@ -18,6 +18,28 @@ test("the single demo sign-in button fills sample credentials and opens the dash
   await expect(page.getByText("Casey Brooks")).toBeVisible();
 });
 
+test("demo sign-in shows the fictional credentials while the dashboard is loading", async ({
+  page,
+}) => {
+  let releaseDashboard!: () => void;
+  const dashboardHeld = new Promise<void>((resolve) => (releaseDashboard = resolve));
+  await page.route(
+    (url) => url.pathname === "/dashboard",
+    async (route) => {
+      await dashboardHeld;
+      await route.continue();
+    },
+  );
+  await page.goto("/login");
+  await page.getByRole("button", { name: "Sign in to demo" }).click();
+  await expect(page.getByLabel("Email")).toHaveValue("sales@aster.example");
+  await expect(page.getByLabel("Password")).toHaveValue("demo");
+  await expect(page.getByRole("button", { name: "Signing in" })).toBeDisabled();
+  releaseDashboard();
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page.getByText("Casey Brooks")).toBeVisible();
+});
+
 test("opening a kiosk service description with Enter does not select that service", async ({
   page,
 }) => {

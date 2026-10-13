@@ -11,9 +11,11 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: "npm run dev -- --hostname 127.0.0.1",
+    // Production build: `next dev` compiles routes on first hit and makes e2e timings flaky.
+    command: "npm run build && npm run start -- --hostname 127.0.0.1",
     url: "http://127.0.0.1:6969/login",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    // Never reuse whatever already listens on 6969; it may be a stale or unrelated server.
+    reuseExistingServer: false,
+    timeout: 300_000,
   },
 });

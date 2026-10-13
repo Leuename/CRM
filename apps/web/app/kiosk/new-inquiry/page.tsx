@@ -13,7 +13,7 @@
    rules (what a mobile looks like, what is still missing) in wizard.ts.
    -------------------------------------------------------------------------- */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import {
@@ -66,6 +66,7 @@ export default function NewInquiry() {
   const { user } = useAuth();
 
   const [screen, setScreen] = useState<Screen>("who");
+  const previousScreen = useRef<Screen>("who");
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
   const [overlay, setOverlay] = useState<"discard" | "duplicate" | null>(null);
   const [busy, setBusy] = useState(false);
@@ -88,6 +89,16 @@ export default function NewInquiry() {
   // Back from step 1 leaves the wizard; from anywhere else it is handled below,
   // so the header's back button is only ever "out of here".
   useKioskChrome(title, subtitle, "/kiosk");
+
+  useEffect(() => {
+    if (previousScreen.current === screen) return;
+    previousScreen.current = screen;
+
+    const target =
+      document.querySelector<HTMLElement>("#kiosk-main [data-kiosk-screen-focus]") ??
+      document.querySelector<HTMLElement>("#kiosk-main [data-kiosk-screen-heading]");
+    target?.focus();
+  }, [screen]);
 
   /* --- reference data ---------------------------------------------------- */
 

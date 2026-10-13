@@ -21,6 +21,9 @@ The reference application is the layout and interaction baseline. Changes are li
 - [x] Role capability and ownership checks in the mock API.
 - [x] Existing component library and design system retained.
 - [x] Keyboard checks for demo login, Filters dialog focus return, and phone-width pagination.
+- [x] Targeted accessibility checks for kiosk skip navigation, main landmarks and one h1 per route, dashboard inquiry labels, and individual-contact heading.
+- [x] Kiosk inquiry screen changes move focus to the next choice or heading and announce the step; CRM detail tabs expose selected state and respond to arrow keys; archive actions identify their contact or opportunity.
+- [x] Login brand panel retains readable copy at 1024px and hides at 390px.
 - [ ] Manual screen-reader review.
 - [ ] Full source-to-demo visual comparison across desktop and mobile breakpoints.
 - [x] Capture all 31 login, CRM, and kiosk paths other than `/` at 1440×900 and 390×844 (62 screenshots); every page returned HTTP 200 with no page errors, off-origin requests, or document-width overflow. Playwright separately verifies the root redirect.
@@ -32,4 +35,4 @@ Playwright covers the demo sign-in, all CRM list/detail/create/edit and settings
 
 A source comparison confirmed exactly 32 page paths in both trees and matched all 49 frontend API request templates to simulator handlers. Dashboard filters now follow the source API’s stage, creation-date, close-date, snapshot, and null-source behavior.
 
-The latest browser pass also checked representative CRM flows at 1440×900, 1024×768, 768×1024, and 390×844. The Opportunities create action, Products pagination, and kiosk customer edit dialog fit at 390px; pagination announces its current page, gives arrow controls accessible names, and disables arrows at either end. The fixed-width kiosk requires horizontal panning in portrait. Route screenshots are captured; full reference comparison and manual screen-reader review remain open.
+The latest browser pass also checked representative CRM flows at 1440×900, 1024×768, 768×1024, and 390×844. The Opportunities create action, Products pagination, and kiosk customer edit dialog fit at 390px; pagination announces its current page, gives arrow controls accessible names, and disables arrows at either end. The fixed-width kiosk requires horizontal panning in portrait. Candidate screenshots cover every route at 1280×720; the reference app's signed-in routes require its unavailable API backend. Full source comparison and spoken screen-reader review remain open. The current Chromium accessibility-tree audit verified the tab, wizard focus, and archive-name fixes, but Narrator output could not be captured.

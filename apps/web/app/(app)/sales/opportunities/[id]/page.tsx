@@ -286,13 +286,22 @@ function OpportunityDetailView({
             items={["Overview", "Products", "History", "Activity"]}
             value={tab}
             onChange={setTab}
+            ariaLabel="Opportunity sections"
+            idBase="opportunity-detail"
           />
         }
       >
-        {tab === "Overview" && <OverviewTab opportunity={opportunity} />}
-        {tab === "Products" && <ProductsTab opportunity={opportunity} />}
-        {tab === "History" && <HistoryTab opportunityId={opportunity.id} />}
-        {tab === "Activity" && <ActivityPanel parent={{ opportunity_id: opportunity.id }} />}
+        <div
+          role="tabpanel"
+          id="opportunity-detail-panel"
+          aria-labelledby={`opportunity-detail-tab-${tab.toLowerCase()}`}
+          tabIndex={0}
+        >
+          {tab === "Overview" && <OverviewTab opportunity={opportunity} />}
+          {tab === "Products" && <ProductsTab opportunity={opportunity} />}
+          {tab === "History" && <HistoryTab opportunityId={opportunity.id} />}
+          {tab === "Activity" && <ActivityPanel parent={{ opportunity_id: opportunity.id }} />}
+        </div>
       </Card>
     </div>
   );

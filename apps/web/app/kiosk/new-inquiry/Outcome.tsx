@@ -41,7 +41,9 @@ export function Confirmation({
         <span className="k-confirm-tick" aria-hidden="true">
           <CheckGlyph />
         </span>
-        <h2 className="k-confirm-h">Demo inquiry simulated</h2>
+        <h2 className="k-confirm-h k-step-focus" data-kiosk-screen-heading tabIndex={-1}>
+          Demo inquiry simulated
+        </h2>
         <p className="k-p">
           This fictional inquiry stayed in this browser tab. It was not sent and no follow-up will
           happen.
@@ -102,7 +104,7 @@ export function Unreachable({
       <span className="k-fail-mark" aria-hidden="true">
         <OfflineGlyph />
       </span>
-      <h2 className="k-confirm-h" role="alert">
+      <h2 className="k-confirm-h k-step-focus" data-kiosk-screen-heading tabIndex={-1} role="alert">
         We couldn&apos;t reach the server
       </h2>
       {/* The draft is still in memory — saying so is the difference between the

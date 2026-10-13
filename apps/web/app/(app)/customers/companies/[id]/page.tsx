@@ -225,12 +225,21 @@ function CompanyDetailView({
               items={["Overview", "Contacts", "Opportunities"]}
               value={tab}
               onChange={setTab}
+              ariaLabel="Company sections"
+              idBase="company-detail"
             />
           }
         >
-          {tab === "Overview" && <OverviewTab company={company} />}
-          {tab === "Contacts" && <ContactsTab companyId={company.id} />}
-          {tab === "Opportunities" && <OpportunitiesTab companyId={company.id} />}
+          <div
+            role="tabpanel"
+            id="company-detail-panel"
+            aria-labelledby={`company-detail-tab-${tab.toLowerCase()}`}
+            tabIndex={0}
+          >
+            {tab === "Overview" && <OverviewTab company={company} />}
+            {tab === "Contacts" && <ContactsTab companyId={company.id} />}
+            {tab === "Opportunities" && <OpportunitiesTab companyId={company.id} />}
+          </div>
         </Card>
       </div>
     </div>

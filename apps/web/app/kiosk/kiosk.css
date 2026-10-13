@@ -53,8 +53,18 @@
   font: 400 16px/24px var(--font-ui);
 }
 
-/* Every screen mounts here: it owns the remaining height and never scrolls the
-   page — a short real-device viewport shrinks this box, not the header. */
+/* Keep the screen area inside the landmark while preserving the fixed kiosk
+   canvas and its existing overflow behavior. */
+.k-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Every screen owns the remaining height and never scrolls the page — a short
+   real-device viewport shrinks this box, not the header. */
 .k-screen {
   flex: 1;
   min-height: 0;
@@ -90,6 +100,24 @@
   align-items: center;
   padding: 0 28px;
   gap: 20px;
+}
+
+.k-skip-link {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  padding: 8px 12px;
+  border: 2px solid var(--k-blue);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--k-blue-dark);
+  font-weight: 700;
+  text-decoration: none;
+  transform: translateY(calc(-100% - 12px));
+}
+.k-skip-link:focus {
+  transform: translateY(0);
 }
 
 .k-back {
@@ -1189,14 +1217,31 @@
   border-radius: 13px;
   align-self: start;
   padding: 16px 18px 14px;
-  cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 .k-variant:hover,
-.k-variant:focus-visible {
+.k-variant:focus-within {
   border-color: var(--k-blue);
+}
+.k-variant-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.k-variant-choice:focus-visible {
+  outline: 2px solid var(--k-blue);
+  outline-offset: 3px;
+  border-radius: 3px;
 }
 .k-variant-on {
   border-color: var(--k-blue);
@@ -1294,6 +1339,11 @@
 .k-h2-tight {
   font: 700 28px/34px var(--font-ui);
   margin: 0 0 14px;
+}
+
+.k-step-focus:focus {
+  outline: 2px solid var(--k-blue);
+  outline-offset: 5px;
 }
 .k-form-grid {
   display: grid;

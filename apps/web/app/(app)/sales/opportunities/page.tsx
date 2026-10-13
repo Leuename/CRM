@@ -489,6 +489,7 @@ export default function OpportunitiesPage() {
                     <Button
                       size="sm"
                       variant="outline"
+                      aria-label={`${busyId === r.id ? (r.archived_at !== null ? "Restoring" : "Archiving") : r.archived_at !== null ? "Restore" : "Archive"} opportunity ${r.title}`}
                       disabled={busyId === r.id}
                       onClick={(e) => {
                         e.stopPropagation();

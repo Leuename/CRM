@@ -18,6 +18,49 @@ test("the single demo sign-in button fills sample credentials and opens the dash
   await expect(page.getByText("Casey Brooks")).toBeVisible();
 });
 
+test("opening a kiosk service description with Enter does not select that service", async ({
+  page,
+}) => {
+  await signIn(page, "desk@aster.example");
+  await page.goto("/kiosk/new-inquiry");
+  await page.getByRole("textbox", { name: /Mobile number/ }).fill("9990000000");
+  await page.getByRole("button", { name: "Continue" }).click();
+
+  const card = page.locator(".k-variant").filter({ hasText: "Strategy Sprint" }).first();
+  const view = card.locator(".k-variant-toggle");
+  const choice = card.locator(".k-variant-choice");
+  await expect(view).toHaveAccessibleName("View Strategy Sprint");
+  await expect(choice).toHaveAttribute("aria-pressed", "false");
+  await view.focus();
+  await page.keyboard.press("Enter");
+
+  await expect(view).toHaveAccessibleName("Hide Strategy Sprint");
+  await expect(view).toHaveAttribute("aria-expanded", "true");
+  await expect(choice).toHaveAttribute("aria-pressed", "false");
+  await expect(view).toHaveAttribute("aria-controls", /k-variant-panel-/);
+});
+
+test("login brand panel keeps its copy readable at tablet width", async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await page.goto("/login");
+
+  const panel = page.getByRole("complementary", { name: "Aster Advisory" });
+  await expect(panel).toBeVisible();
+  const panelBounds = await panel.boundingBox();
+  expect(panelBounds).not.toBeNull();
+  if (panelBounds === null) throw new Error("The brand panel should be rendered");
+  expect(panelBounds.width).toBeGreaterThanOrEqual(320);
+
+  const tagline = panel.getByText(
+    "One clear view of every customer, conversation, and opportunity.",
+  );
+  const taglineHeight = await tagline.evaluate((element) => element.getBoundingClientRect().height);
+  expect(taglineHeight).toBeLessThanOrEqual(92);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(panel).toBeHidden();
+});
+
 test("login validation announces and describes field errors", async ({ page }) => {
   await page.goto("/login");
   await page.getByLabel("Email").fill("not-an-email");
@@ -34,11 +77,13 @@ test("login validation announces and describes field errors", async ({ page }) =
   await expect(hint).toHaveAttribute("aria-atomic", "true");
 });
 
-test("administrator signs in and sees the synthetic CRM dashboard", async ({ page }) => {
+test("administrator signs in and sees the synthetic CRM dashboard", async ({ page, baseURL }) => {
+  if (!baseURL) throw new Error("Playwright baseURL must be configured for origin checks");
+  const appOrigin = new URL(baseURL).origin;
   const offOriginRequests: string[] = [];
   page.on("request", (request) => {
     const url = new URL(request.url());
-    if (["http:", "https:"].includes(url.protocol) && url.origin !== "http://127.0.0.1:6969") {
+    if (["http:", "https:"].includes(url.protocol) && url.origin !== appOrigin) {
       offOriginRequests.push(url.origin);
     }
   });
@@ -47,6 +92,9 @@ test("administrator signs in and sees the synthetic CRM dashboard", async ({ pag
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
   await expect(page.getByRole("note")).toContainText("Do not enter real customer data");
   await expect(page.getByText("Active opportunities", { exact: false }).first()).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Consultation: 6 inquiries, 21% of inquiries" }),
+  ).toBeVisible();
   expect(offOriginRequests).toEqual([]);
 });
 
@@ -88,6 +136,9 @@ test("administrator can open every CRM list, detail, create, edit, and settings 
     await expect(page.locator("body"), route).not.toContainText("Application error");
   }
 
+  await page.goto("/customers/individuals/contact_01");
+  await expect(page.getByRole("heading", { name: "Amara Bennett", level: 2 })).toBeVisible();
+
   const redirects = [
     ["/", "/dashboard"],
     ["/opportunities", "/sales/opportunities"],
@@ -127,6 +178,30 @@ test("operations account lands in the separate front desk shell", async ({ page 
   await expect(
     page.getByRole("dialog", { name: "Edit customer details" }).getByRole("note"),
   ).toContainText("Do not enter real customer details");
+});
+
+test("kiosk routes provide a skip link, main landmark, and one page heading", async ({ page }) => {
+  await signIn(page, "desk@aster.example");
+
+  const skipLink = page.getByRole("link", { name: "Skip to main content" });
+  await expect(skipLink).toHaveAttribute("href", "#kiosk-main");
+  await page.keyboard.press("Tab");
+  await expect(skipLink).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("main")).toBeFocused();
+
+  for (const route of [
+    "/kiosk",
+    "/kiosk/customers",
+    "/kiosk/customers/contact_01",
+    "/kiosk/inquiries",
+    "/kiosk/visits",
+    "/kiosk/new-inquiry",
+  ]) {
+    await page.goto(route);
+    await expect(page.getByRole("main"), route).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 }), route).toHaveCount(1);
+  }
 });
 
 test("kiosk customer edit dialog fits a phone viewport and saves", async ({ page }) => {

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ApiError, getMe, login } from "@/lib/api";
 import { homePathForRole } from "@/lib/kiosk-role";
 import { Button, Input } from "@/lib/ds";
+import styles from "./page.module.css";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DEMO_EMAIL = "sales@aster.example";
@@ -75,25 +76,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        minHeight: "100vh",
-        background: "var(--primary)",
-      }}
-    >
-      <main
-        style={{
-          width: 802,
-          maxWidth: "100%",
-          background: "#fff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "71px clamp(24px, 8vw, 153px)",
-          boxSizing: "border-box",
-        }}
-      >
+    <div className={styles.shell}>
+      <main className={styles.main}>
         <form
           onSubmit={onSubmit}
           noValidate
@@ -183,10 +167,7 @@ export default function LoginPage() {
         </form>
       </main>
 
-      <aside
-        aria-label="Aster Advisory"
-        style={{ flex: 1, position: "relative", overflow: "hidden" }}
-      >
+      <aside aria-label="Aster Advisory" className={styles.aside}>
         {/* eslint-disable-next-line @next/next/no-img-element -- static brand asset, no optimisation pipeline needed */}
         <img
           src="/aster-advisory.webp"
@@ -219,39 +200,12 @@ export default function LoginPage() {
               "linear-gradient(to top, color-mix(in srgb, var(--primary-dark) 92%, transparent) 0%, color-mix(in srgb, var(--primary-dark) 82%, transparent) 18%, color-mix(in srgb, var(--primary-dark) 45%, transparent) 34%, transparent 58%)",
           }}
         />
-        <div
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            padding: "clamp(32px, 5vw, 64px)",
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-            color: "#fff",
-          }}
-        >
-          <p style={{ margin: 0, font: "600 32px/40px var(--font-ui)" }}>Aster Advisory</p>
-          <p
-            style={{
-              margin: 0,
-              font: "400 18px/26px var(--font-ui)",
-              opacity: 0.85,
-              textWrap: "balance",
-            }}
-          >
+        <div className={styles.brandCopy}>
+          <p className={styles.brandName}>Aster Advisory</p>
+          <p className={styles.brandTagline}>
             One clear view of every customer, conversation, and opportunity.
           </p>
-          <p
-            style={{
-              margin: 0,
-              font: "400 13px/20px var(--font-ui)",
-              opacity: 0.8,
-            }}
-          >
-            CRM portfolio demo
-          </p>
+          <p className={styles.brandCaption}>CRM portfolio demo</p>
         </div>
       </aside>
     </div>

@@ -118,7 +118,10 @@ export function StepWho({
   return (
     <>
       <div className="k-pad k-grow">
-        <h2 className="k-h2">Input mobile number.</h2>
+        <h2 className="k-h2 k-step-focus" data-kiosk-screen-heading tabIndex={-1}>
+          <span className="sr-only">Step 1 of 4. </span>
+          Input mobile number.
+        </h2>
         <div className="k-mobile-row">
           <span className="k-mobile-cc" aria-hidden="true">
             +63
@@ -181,6 +184,9 @@ export function MatchFound({
   return (
     <>
       <div className="k-pad k-grow k-scroll">
+        <h2 className="sr-only k-step-focus" data-kiosk-screen-heading tabIndex={-1}>
+          Step 1 of 4. A matching customer was found.
+        </h2>
         <div className="k-notice">
           <WarningGlyph />
           This number matches an existing record.
@@ -271,12 +277,16 @@ export function StepWhat({
   return (
     <>
       <div className="k-what k-grow">
+        <h2 className="sr-only k-step-focus" data-kiosk-screen-heading tabIndex={-1}>
+          Step 2 of 4. Choose what they need.
+        </h2>
         <div className="k-what-cats">
-          {categories.map((c) => (
+          {categories.map((c, index) => (
             <button
               type="button"
               key={c}
               className={`k-cat${c === category ? " k-cat-on" : ""}`}
+              data-kiosk-screen-focus={index === 0 ? "" : undefined}
               aria-pressed={c === category}
               onClick={() => onCategory(c)}
             >
@@ -289,7 +299,9 @@ export function StepWhat({
         </div>
 
         <div className="k-what-list">
-          <div className="k-section-label">{category ?? "Services"}</div>
+          <div className="k-section-label" data-kiosk-screen-focus tabIndex={-1}>
+            {category ?? "Services"}
+          </div>
           <div className="k-variants">
             {loading && <KioskLoadingRows count={4} />}
             {error != null && <KioskError error={error} />}
@@ -313,34 +325,28 @@ export function StepWhat({
               const open = openRoom === p.id;
               const productPresentation = presentationFor(p.id);
               return (
-                // The whole card is the target: choosing a service shows it, exactly
-                // as the design does (its `pick` sets both the selection and the
-                // open panel). The chevron is a second way to look without
-                // choosing, not the only way in.
-                <div
-                  key={p.id}
-                  role="button"
-                  tabIndex={0}
-                  aria-pressed={picked}
-                  className={`k-variant${picked ? " k-variant-on" : ""}`}
-                  onClick={() => onPick(p)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      onPick(p);
-                    }
-                  }}
-                >
-                  <span className="k-variant-name">{p.name}</span>
-                  {productPresentation && (
-                    <span className="k-variant-meta">{productPresentation.meta}</span>
-                  )}
-                  <span className="k-variant-rate">{rateLabel(p)}</span>
+                <div key={p.id} className={`k-variant${picked ? " k-variant-on" : ""}`}>
+                  <button
+                    type="button"
+                    className="k-variant-choice"
+                    aria-pressed={picked}
+                    onClick={() => onPick(p)}
+                  >
+                    <span className="k-variant-name">{p.name}</span>
+                    {productPresentation && (
+                      <span className="k-variant-meta">{productPresentation.meta}</span>
+                    )}
+                    <span className="k-variant-rate">{rateLabel(p)}</span>
+                  </button>
 
                   {/* Always mounted, never conditionally rendered: the design
                       animates it open (max-height + opacity), and a panel that
                       only exists once opened cannot transition. */}
-                  <div className={`k-variant-panel${open ? " k-variant-panel-open" : ""}`}>
+                  <div
+                    id={`k-variant-panel-${p.id}`}
+                    className={`k-variant-panel${open ? " k-variant-panel-open" : ""}`}
+                    aria-hidden={!open}
+                  >
                     <div className="k-variant-photo">
                       {productPresentation && (
                         /* eslint-disable-next-line @next/next/no-img-element --
@@ -357,6 +363,7 @@ export function StepWhat({
                     type="button"
                     className="k-variant-toggle"
                     aria-expanded={open}
+                    aria-controls={`k-variant-panel-${p.id}`}
                     aria-label={open ? `Hide ${p.name}` : `View ${p.name}`}
                     onClick={(e) => {
                       // Looking is not choosing: without this the chevron would
@@ -415,7 +422,10 @@ export function StepDetails({
   return (
     <>
       <div className="k-pad k-grow k-scroll">
-        <h2 className="k-h2 k-h2-tight">User details</h2>
+        <h2 className="k-h2 k-h2-tight k-step-focus" data-kiosk-screen-heading tabIndex={-1}>
+          <span className="sr-only">Step 3 of 4. </span>
+          User details
+        </h2>
 
         <div className="k-form-grid">
           <Field label="Full name">
@@ -617,7 +627,10 @@ export function StepReview({
   return (
     <>
       <div className="k-pad k-grow k-scroll">
-        <h2 className="k-h2 k-h2-tight">Check this with the customer</h2>
+        <h2 className="k-h2 k-h2-tight k-step-focus" data-kiosk-screen-heading tabIndex={-1}>
+          <span className="sr-only">Step 4 of 4. </span>
+          Check this with the customer
+        </h2>
         <p className="k-p">Tap any row to correct it.</p>
 
         <div className="k-review">

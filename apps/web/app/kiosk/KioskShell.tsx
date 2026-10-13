@@ -125,6 +125,9 @@ export function KioskShell({ children }: { children: React.ReactNode }) {
     <ChromeContext.Provider value={setChrome}>
       <div className="k-root">
         <div className="k-frame">
+          <a className="k-skip-link" href="#kiosk-main">
+            Skip to main content
+          </a>
           <header className="k-header">
             {!isHome && (
               <button
@@ -142,8 +145,10 @@ export function KioskShell({ children }: { children: React.ReactNode }) {
               </span>
             )}
             <div className="k-titles">
-              <div className="k-title">{chrome.title}</div>
-              <div className="k-subtitle">{chrome.subtitle}</div>
+              <h1 className={isHome ? "sr-only" : "k-title"}>{chrome.title || "Front desk"}</h1>
+              <div className="k-subtitle" aria-live="polite" aria-atomic="true">
+                {chrome.subtitle}
+              </div>
             </div>
             <div className="k-headtools">
               <StatusPill />
@@ -156,7 +161,9 @@ export function KioskShell({ children }: { children: React.ReactNode }) {
             Demo only. Do not enter real customer details. Entries stay in this tab and are not sent
             or followed up.
           </div>
-          {children}
+          <main id="kiosk-main" className="k-main" tabIndex={-1}>
+            {children}
+          </main>
         </div>
       </div>
     </ChromeContext.Provider>

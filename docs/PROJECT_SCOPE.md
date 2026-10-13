@@ -4,7 +4,7 @@
 
 Deliver a public-ready Aster CRM portfolio demo that preserves the existing CRM screens and workflows while replacing the organization identity, colors, business data, and runtime service layer with fictional equivalents.
 
-The project owner confirmed permission to redistribute the copied application and design materials. The source repository remains a separate read-only reference; this target has its own empty Git history and the `feat/portfolio-demo` branch.
+The project owner confirmed permission to redistribute the copied application and design materials. The source repository remains a separate read-only reference; the target has an independent Git history and the local development branch is `feat/portfolio-demo`.
 
 ## Included
 
@@ -22,4 +22,4 @@ The project owner confirmed permission to redistribute the copied application an
 
 ## Acceptance status
 
-The application builds locally and the simulator is covered by automated tests. Production deployment and a live deployed-network inspection are release steps; see [release readiness](RELEASE_READINESS.md) and [deployment notes](DEPLOYMENT.md).
+The application builds locally and the simulator is covered by automated tests. The earlier public demo URL now returns HTTP 404, and the current Vercel project has no deployment; confirming the public target, publishing the updated source, and inspecting deployed network behavior remain release steps. See [release readiness](RELEASE_READINESS.md) and [deployment notes](DEPLOYMENT.md).

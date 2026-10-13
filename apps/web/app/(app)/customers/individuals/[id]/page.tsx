@@ -185,9 +185,15 @@ function ContactDetailView({
         {/* Identity rail */}
         <Card style={{ textAlign: "center" }}>
           <Avatar name={fullName(contact)} size={120} radius={16} />
-          <div style={{ font: "700 20px/32px var(--font-ui)", marginTop: 14 }}>
+          <h2
+            style={{
+              font: "700 20px/32px var(--font-ui)",
+              marginTop: 14,
+              marginBottom: 0,
+            }}
+          >
             {fullName(contact)}
-          </div>
+          </h2>
           {contact.position && (
             <div
               style={{
@@ -276,16 +282,25 @@ function ContactDetailView({
               items={["Overview", "Opportunities", "Activity"]}
               value={tab}
               onChange={setTab}
+              ariaLabel="Contact sections"
+              idBase="contact-detail"
             />
           }
         >
-          {tab === "Overview" && (
-            <OverviewTab contact={contact} status={status.label} sourceName={sourceName} />
-          )}
-          {tab === "Opportunities" && (
-            <OpportunitiesTab contactId={contact.id} canAdd={!isArchived} />
-          )}
-          {tab === "Activity" && <ActivityPanel parent={{ contact_id: contact.id }} />}
+          <div
+            role="tabpanel"
+            id="contact-detail-panel"
+            aria-labelledby={`contact-detail-tab-${tab.toLowerCase()}`}
+            tabIndex={0}
+          >
+            {tab === "Overview" && (
+              <OverviewTab contact={contact} status={status.label} sourceName={sourceName} />
+            )}
+            {tab === "Opportunities" && (
+              <OpportunitiesTab contactId={contact.id} canAdd={!isArchived} />
+            )}
+            {tab === "Activity" && <ActivityPanel parent={{ contact_id: contact.id }} />}
+          </div>
         </Card>
       </div>
     </div>

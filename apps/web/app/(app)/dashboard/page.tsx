@@ -546,6 +546,7 @@ export default function DashboardPage() {
                   <ul className="dash-src-list">
                     {ranked.map((i, idx) => {
                       const name = i.source_name ?? "No source";
+                      const share = Math.round((i.inquiries / total) * 100);
                       // "No source" is a real bucket the server can answer for,
                       // so it is clickable too — NO_SOURCE is the literal it
                       // reserves for the null-source slice.
@@ -562,11 +563,10 @@ export default function DashboardPage() {
                           <span className="dash-src-name">{name}</span>
                           <span className="dash-src-val">
                             {i.inquiries}
+                            <span className="sr-only"> inquiries, </span>
                             {/* Share of the donut, not a server metric — the arc
                                 beside it encodes the same number. */}
-                            <span className="dash-src-pct">
-                              {Math.round((i.inquiries / total) * 100)}%
-                            </span>
+                            <span className="dash-src-pct">{share}%</span>
                           </span>
                         </>
                       );
@@ -578,6 +578,7 @@ export default function DashboardPage() {
                               className="drill-fig drill-src"
                               onClick={open}
                               aria-haspopup="dialog"
+                              aria-label={`${name}: ${i.inquiries} inquiries, ${share}% of inquiries`}
                             >
                               {row}
                             </button>
@@ -653,13 +654,15 @@ export default function DashboardPage() {
                               style={{ top: waveY(t, top) }}
                             />
                           ))}
-                          <WaveChart
-                            className="chart-wave"
-                            data={points}
-                            height={WAVE_PX}
-                            min={0}
-                            max={top}
-                          />
+                          <div aria-hidden="true">
+                            <WaveChart
+                              className="chart-wave"
+                              data={points}
+                              height={WAVE_PX}
+                              min={0}
+                              max={top}
+                            />
+                          </div>
                           {points.map((v, i) => (
                             <span
                               key={i}

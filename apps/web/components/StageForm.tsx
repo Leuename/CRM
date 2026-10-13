@@ -45,7 +45,7 @@ export function StageForm({ initial }: { initial?: PipelineStage }) {
   );
   const [sortOrder, setSortOrder] = useState(initial ? String(initial.sort_order) : "");
   const [color, setColor] = useState(
-    initial?.color === "green" ? "indigo" : (initial?.color ?? "slate"),
+    initial?.color === "green" ? "blue" : (initial?.color ?? "slate"),
   );
   const [active, setActive] = useState(initial?.active ?? true);
 

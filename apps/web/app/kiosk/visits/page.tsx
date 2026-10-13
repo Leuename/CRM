@@ -14,7 +14,7 @@
    "call" would not answer the question the screen exists for.
    -------------------------------------------------------------------------- */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { type Activity, type Contact, getContact, listActivities } from "@/lib/api";
 import { fullName } from "../kiosk-format";
 import { useKioskChrome } from "../KioskShell";
@@ -54,6 +54,8 @@ export default function TodaysVisits() {
   useKioskChrome("Today's appointments", "Expected at reception", "/kiosk");
 
   const [view, setView] = useState<CalendarView>("day");
+  const calendarId = useId();
+  const tabRefs = useRef(new Map<CalendarView, HTMLButtonElement>());
   const [anchor, setAnchor] = useState<Date>(() => startOfDay(new Date()));
   const [items, setItems] = useState<Activity[]>([]);
   const [total, setTotal] = useState(0);
@@ -159,6 +161,33 @@ export default function TodaysVisits() {
       : `${visitsLabel(items.length)} · from activities due this ${view} · read only. Arrivals are logged by the sales team.` +
         (shortfall ? ` ${shortfall}` : "");
 
+  function handleViewKeyDown(e: React.KeyboardEvent<HTMLButtonElement>, current: CalendarView) {
+    const currentIndex = VIEWS.indexOf(current);
+    let nextIndex: number;
+
+    switch (e.key) {
+      case "ArrowLeft":
+        nextIndex = (currentIndex + VIEWS.length - 1) % VIEWS.length;
+        break;
+      case "ArrowRight":
+        nextIndex = (currentIndex + 1) % VIEWS.length;
+        break;
+      case "Home":
+        nextIndex = 0;
+        break;
+      case "End":
+        nextIndex = VIEWS.length - 1;
+        break;
+      default:
+        return;
+    }
+
+    e.preventDefault();
+    const next = VIEWS[nextIndex];
+    setView(next);
+    tabRefs.current.get(next)?.focus();
+  }
+
   return (
     <div className="k-screen k-visits">
       <div className="k-cal-bar">
@@ -189,9 +218,17 @@ export default function TodaysVisits() {
               type="button"
               role="tab"
               key={v}
+              id={`${calendarId}-${v}-tab`}
+              aria-controls={`${calendarId}-panel`}
               aria-selected={v === view}
+              tabIndex={v === view ? 0 : -1}
               className={`k-cal-tab${v === view ? " k-cal-tab-on" : ""}`}
+              ref={(element) => {
+                if (element) tabRefs.current.set(v, element);
+                else tabRefs.current.delete(v);
+              }}
               onClick={() => setView(v)}
+              onKeyDown={(e) => handleViewKeyDown(e, v)}
             >
               {v[0].toUpperCase() + v.slice(1)}
             </button>
@@ -199,31 +236,40 @@ export default function TodaysVisits() {
         </div>
       </div>
 
-      {status === "loading" && (
-        <div className="k-pad">
-          <KioskLoadingRows count={3} />
-        </div>
-      )}
-      {status === "error" && (
-        <div className="k-pad">
-          <KioskError error={error} />
-        </div>
-      )}
+      <div
+        id={`${calendarId}-panel`}
+        role="tabpanel"
+        aria-labelledby={`${calendarId}-${view}-tab`}
+        aria-busy={status === "loading"}
+        tabIndex={0}
+        style={{ display: "flex", flex: 1, flexDirection: "column", minHeight: 0 }}
+      >
+        {status === "loading" && (
+          <div className="k-pad k-grow">
+            <KioskLoadingRows count={3} />
+          </div>
+        )}
+        {status === "error" && (
+          <div className="k-pad k-grow">
+            <KioskError error={error} />
+          </div>
+        )}
 
-      {status === "ready" && view === "day" && (
-        <DayGrid
-          activities={byDay.get(dayKey(anchor)) ?? []}
-          anchor={anchor}
-          label={label}
-          onDrill={setDrill}
-        />
-      )}
-      {status === "ready" && view === "week" && (
-        <WeekGrid anchor={anchor} byDay={byDay} label={label} onDrill={setDrill} />
-      )}
-      {status === "ready" && view === "month" && (
-        <MonthGrid anchor={anchor} byDay={byDay} label={label} onDrill={setDrill} />
-      )}
+        {status === "ready" && view === "day" && (
+          <DayGrid
+            activities={byDay.get(dayKey(anchor)) ?? []}
+            anchor={anchor}
+            label={label}
+            onDrill={setDrill}
+          />
+        )}
+        {status === "ready" && view === "week" && (
+          <WeekGrid anchor={anchor} byDay={byDay} label={label} onDrill={setDrill} />
+        )}
+        {status === "ready" && view === "month" && (
+          <MonthGrid anchor={anchor} byDay={byDay} label={label} onDrill={setDrill} />
+        )}
+      </div>
 
       <div className="k-cal-foot">{footer}</div>
 

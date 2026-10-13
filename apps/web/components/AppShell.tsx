@@ -10,6 +10,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+      <a className="app-skip-link" href="#app-main">
+        Skip to main content
+      </a>
       <AppNav />
       <div
         style={{
@@ -31,6 +34,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* key on the route makes the entrance animation replay per navigation. */}
         <main
           key={active?.value ?? "app"}
+          id="app-main"
+          tabIndex={-1}
           className="app-main"
           style={{
             flex: 1,

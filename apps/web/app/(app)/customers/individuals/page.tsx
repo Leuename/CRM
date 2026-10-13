@@ -413,6 +413,7 @@ export default function ContactsPage() {
                     <Button
                       size="sm"
                       variant="outline"
+                      aria-label={`${busyId === r.id ? (archived ? "Restoring" : "Archiving") : archived ? "Restore" : "Archive"} contact ${fullName(r) || "without a name"}`}
                       disabled={busyId === r.id}
                       onClick={(e) => {
                         e.stopPropagation();

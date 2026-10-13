@@ -56,6 +56,25 @@ body {
   border: 0;
 }
 
+.app-skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 200;
+  padding: 8px 12px;
+  border: 2px solid var(--primary);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-weight: 700;
+  text-decoration: none;
+  transform: translateY(calc(-100% - 12px));
+}
+
+.app-skip-link:focus {
+  transform: translateY(0);
+}
+
 /* ---------------------------------------------------------------------------
    Navigation rail (components/AppNav.tsx)
    --------------------------------------------------------------------------- */

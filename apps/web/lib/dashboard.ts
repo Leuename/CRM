@@ -42,7 +42,10 @@ export function stageCssColor(color: string | null | undefined): string {
 // Same keyword set, the pastel card fill instead of the full-strength hue. The
 // mixes live in the DS token file — this is only the keyword → token lookup.
 export function stageTintColor(color: string | null | undefined): string {
-  return color && STAGE_CSS[color] ? `var(--stage-tint-${color})` : "var(--surface-sunken)";
+  const normalizedColor = color === "green" ? "blue" : color;
+  return normalizedColor && STAGE_CSS[normalizedColor]
+    ? `var(--stage-tint-${normalizedColor})`
+    : "var(--surface-sunken)";
 }
 
 // Board card icons (visual reference). The seed's six active stages are

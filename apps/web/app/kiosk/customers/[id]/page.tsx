@@ -92,9 +92,9 @@ export default function CustomerRecord() {
           {initials(name)}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h1 className="k-name" style={{ margin: 0 }}>
+          <h2 className="k-name" style={{ margin: 0 }}>
             {name}
-          </h1>
+          </h2>
           <div className="k-company">{contact.company_name ?? "No company on record"}</div>
         </div>
         {/* Live since edit_customer_profile: a capability that reaches these

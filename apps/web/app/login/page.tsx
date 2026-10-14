@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ApiError, getMe, login } from "@/lib/api";
 import { homePathForRole } from "@/lib/kiosk-role";
 import { Button, Input } from "@/lib/ds";
+import { DemoWarningDialog } from "@/components/DemoWarningDialog";
 import styles from "./page.module.css";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -24,6 +25,7 @@ export default function LoginPage() {
   }>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [pendingDestination, setPendingDestination] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -58,7 +60,8 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       const user = await login(nextEmail, nextPassword);
-      router.replace(homePathForRole(user.role));
+      setPendingDestination(homePathForRole(user.role));
+      setSubmitting(false);
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
         setFormError("Invalid email or password");
@@ -99,20 +102,6 @@ export default function LoginPage() {
           >
             Welcome to the Aster CRM demo.
           </h1>
-
-          <p
-            role="note"
-            style={{
-              margin: "-40px 0 0",
-              font: "400 14px/21px var(--font-ui)",
-              color: "var(--text-secondary)",
-            }}
-          >
-            Demo only. Do not enter real customer, employee, personal, or confidential data.{" "}
-            <strong>Sign in to demo</strong>
-            fills fictional sample credentials and opens the dashboard. Entries stay in this browser
-            tab, are not sent to a CRM service, and clear when you sign out or close the tab.
-          </p>
 
           <div
             style={{
@@ -212,6 +201,12 @@ export default function LoginPage() {
           <p className={styles.brandCaption}>CRM portfolio demo</p>
         </div>
       </aside>
+      <DemoWarningDialog
+        open={pendingDestination !== null}
+        onContinue={() => {
+          if (pendingDestination) router.replace(pendingDestination);
+        }}
+      />
     </div>
   );
 }

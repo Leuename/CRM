@@ -5,30 +5,34 @@ async function signIn(page: import("@playwright/test").Page, email: string) {
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill("demo");
   await page.getByRole("button", { name: "Sign in to demo" }).click();
+  await page.getByRole("button", { name: "Continue to demo" }).click();
 }
 
-test("the single demo sign-in button fills sample credentials and opens the dashboard", async ({
-  page,
-}) => {
+test("demo sign-in shows a data warning before opening the dashboard", async ({ page }) => {
   await page.goto("/login");
   await expect(page.getByRole("heading", { name: "Welcome to the Aster CRM demo." })).toBeVisible();
-  await expect(page.getByRole("note")).toContainText(
-    "Do not enter real customer, employee, personal, or confidential data",
-  );
+  await expect(page.getByRole("note")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Sign in to demo" })).toHaveCount(1);
   await page.getByRole("button", { name: "Sign in to demo" }).click();
+  const warning = page.getByRole("alertdialog", { name: "Demo data warning" });
+  await expect(warning).toBeVisible();
+  await expect(warning).toContainText(
+    "Do not enter real customer, employee, personal, or confidential data",
+  );
+  await expect(page).toHaveURL(/\/login$/);
+  await page.getByRole("button", { name: "Continue to demo" }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByText("Casey Brooks")).toBeVisible();
 });
 
-test("demo sign-in shows the fictional credentials while the dashboard is loading", async ({
-  page,
-}) => {
+test("the demo warning must be continued before opening the dashboard", async ({ page }) => {
   let releaseDashboard!: () => void;
+  let dashboardRequested = false;
   const dashboardHeld = new Promise<void>((resolve) => (releaseDashboard = resolve));
   await page.route(
     (url) => url.pathname === "/dashboard",
     async (route) => {
+      dashboardRequested = true;
       await dashboardHeld;
       await route.continue();
     },
@@ -37,7 +41,10 @@ test("demo sign-in shows the fictional credentials while the dashboard is loadin
   await page.getByRole("button", { name: "Sign in to demo" }).click();
   await expect(page.getByLabel("Email")).toHaveValue("sales@aster.example");
   await expect(page.getByLabel("Password")).toHaveValue("demo");
-  await expect(page.getByRole("button", { name: "Signing in" })).toBeDisabled();
+  await expect(page.getByRole("alertdialog", { name: "Demo data warning" })).toBeVisible();
+  expect(dashboardRequested).toBe(false);
+  await page.getByRole("button", { name: "Continue to demo" }).click();
+  await expect.poll(() => dashboardRequested).toBe(true);
   releaseDashboard();
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByText("Casey Brooks")).toBeVisible();

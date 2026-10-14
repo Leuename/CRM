@@ -1,8 +1,14 @@
 import { expect, test } from "@playwright/test";
 
+async function continueToDemo(page: import("@playwright/test").Page) {
+  await expect(page.getByRole("alertdialog", { name: "Demo data warning" })).toBeVisible();
+  await page.getByRole("button", { name: "Continue to demo" }).click();
+}
+
 test("invalid opportunity contact is focused and described", async ({ page }) => {
   await page.goto("/login");
   await page.getByRole("button", { name: "Sign in to demo" }).click();
+  await continueToDemo(page);
   await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto("/sales/opportunities/new");
@@ -24,6 +30,7 @@ test("invalid opportunity contact is focused and described", async ({ page }) =>
 test("opportunity product line fields follow keyboard order and select", async ({ page }) => {
   await page.goto("/login");
   await page.getByRole("button", { name: "Sign in to demo" }).click();
+  await continueToDemo(page);
   await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto("/sales/opportunities/new");

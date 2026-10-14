@@ -1,8 +1,14 @@
 import { expect, test } from "@playwright/test";
 
+async function continueToDemo(page: import("@playwright/test").Page) {
+  await expect(page.getByRole("alertdialog", { name: "Demo data warning" })).toBeVisible();
+  await page.getByRole("button", { name: "Continue to demo" }).click();
+}
+
 test("back-office routes provide a keyboard skip link to main content", async ({ page }) => {
   await page.goto("/login");
   await page.getByRole("button", { name: "Sign in to demo" }).click();
+  await continueToDemo(page);
   await expect(page).toHaveURL(/\/dashboard$/);
 
   const skipLink = page.getByRole("link", { name: "Skip to main content" });
@@ -39,6 +45,7 @@ test("kiosk visit calendar tabs support keyboard navigation and label the panel"
   await page.getByLabel("Email").fill("desk@aster.example");
   await page.getByLabel("Password").fill("demo");
   await page.getByRole("button", { name: "Sign in to demo" }).click();
+  await continueToDemo(page);
   await expect(page).toHaveURL(/\/kiosk$/);
   await page.goto("/kiosk/visits");
 
@@ -86,6 +93,7 @@ test("new-inquiry transitions announce the step and move focus into its choices"
   await page.getByLabel("Email").fill("desk@aster.example");
   await page.getByLabel("Password").fill("demo");
   await page.getByRole("button", { name: "Sign in to demo" }).click();
+  await continueToDemo(page);
   await expect(page).toHaveURL(/\/kiosk$/);
   await page.goto("/kiosk/new-inquiry");
 
@@ -105,6 +113,7 @@ test("CRM detail tabs expose selection, panel relationships, and arrow-key navig
 }) => {
   await page.goto("/login");
   await page.getByRole("button", { name: "Sign in to demo" }).click();
+  await continueToDemo(page);
   await expect(page).toHaveURL(/\/dashboard$/);
   await page.goto("/sales/opportunities/new");
   await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
@@ -150,6 +159,7 @@ test("CRM detail tabs expose selection, panel relationships, and arrow-key navig
 test("archive and restore buttons identify the row they act on", async ({ page }) => {
   await page.goto("/login");
   await page.getByRole("button", { name: "Sign in to demo" }).click();
+  await continueToDemo(page);
   await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto("/customers/individuals");

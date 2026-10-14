@@ -45,8 +45,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           }}
         >
           <div className="demo-safety-notice" role="note">
-            <strong>Demo only.</strong> Do not enter real customer data. Changes stay in this
-            browser tab, clear when you sign out or close it, and are not sent to a real CRM.
+            <strong>Demo only.</strong> Do not enter real customer data. Values are replaced with
+            fictional samples when saved. Changes stay in this browser tab and clear when you sign
+            out or close it.
           </div>
           {children}
         </main>

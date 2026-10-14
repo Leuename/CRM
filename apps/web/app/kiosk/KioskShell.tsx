@@ -158,8 +158,8 @@ export function KioskShell({ children }: { children: React.ReactNode }) {
           </header>
           <div className="k-demo-notice k-shell-demo-notice" role="note">
             <WarningGlyph />
-            Demo only. Do not enter real customer details. Entries stay in this tab and are not sent
-            or followed up.
+            Demo only. Do not enter real customer details. Saved values become fictional samples.
+            Entries stay in this tab and are not sent or followed up.
           </div>
           <main id="kiosk-main" className="k-main" tabIndex={-1}>
             {children}

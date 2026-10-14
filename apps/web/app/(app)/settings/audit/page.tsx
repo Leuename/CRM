@@ -14,6 +14,7 @@ import { Button, Card, DataTable, EmptyState, Input, Pagination, Tag } from "@/l
 import { Select } from "@/components/Select";
 import { FilterButton, FilterDialog } from "@/components/FilterDialog";
 import { TableSkeleton } from "@/components/Skeleton";
+import { dateInputEndExclusiveIso, dateInputStartIso } from "@/lib/date-range";
 
 const LIMIT = 25;
 
@@ -124,9 +125,8 @@ export default function AuditPageView() {
         actor_id: actorId || undefined,
         action: action || undefined,
         correlation_id: correlationId.trim() || undefined,
-        date_from: from ? new Date(from).toISOString() : undefined,
-        // `to` is a date; include the whole day by pushing to its end.
-        date_to: to ? new Date(`${to}T23:59:59`).toISOString() : undefined,
+        date_from: dateInputStartIso(from),
+        date_to: dateInputEndExclusiveIso(to),
       },
       controller.signal,
     )

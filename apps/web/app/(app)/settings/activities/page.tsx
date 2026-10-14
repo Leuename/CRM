@@ -7,6 +7,7 @@ import { ActivityTimeline } from "@/components/ActivityTimeline";
 import { Card, Input, Pagination } from "@/lib/ds";
 import { Select } from "@/components/Select";
 import { FilterButton, FilterDialog } from "@/components/FilterDialog";
+import { dateInputEndExclusiveIso, dateInputStartIso } from "@/lib/date-range";
 
 const LIMIT = 25;
 
@@ -54,9 +55,8 @@ export default function ActivitiesPage() {
         limit: LIMIT,
         offset,
         activity_type: type || undefined,
-        occurred_from: from ? new Date(from).toISOString() : undefined,
-        // `to` is a date; include the whole day by pushing to its end.
-        occurred_to: to ? new Date(`${to}T23:59:59`).toISOString() : undefined,
+        occurred_from: dateInputStartIso(from),
+        occurred_to: dateInputEndExclusiveIso(to),
         ...(entityActive ? { [scope]: entityId.trim() } : {}),
       },
       controller.signal,

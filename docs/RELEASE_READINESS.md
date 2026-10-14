@@ -2,23 +2,25 @@
 
 ## Current status
 
-The Aster CRM demo is a client-side simulator with fictional seed data. Sign-in, roles, and business changes are simulated; data stays in the current browser tab. It is not suitable for real customer data or production CRM use.
+The Aster CRM demo is a client-side simulator with fictional seed data. Sign-in, roles, and business changes are simulated; supported writes convert editable inputs to fictional presets, and data stays in the current browser tab. It is not suitable for real customer data or production CRM use.
 
-**Local application checks pass, but the public launch is waiting on the Next.js security update announced for October 14.** As of `2026-10-14T07:39:59+08:00` (Manila), Next.js still describes the update as upcoming; affected ranges and upgrade instructions are not available. The candidate uses Next.js 16.4.0. Vercel reports `live=false`; the latest preview is READY, and SSO protects all deployments. There is no live production deployment or public production URL. PR #1 remains open, its preview is READY, and both Vercel checks passed. Recheck the official guidance, map its affected ranges to the candidate, apply any required update, then rerun the release suite before launch. See the [official announcement](https://nextjs.org/blog/upcoming-nextjs-security-update-october-2026) and [Next.js advisories](https://github.com/vercel/next.js/security/advisories).
+**Do not publish yet.** As of 2026-10-14T08:40:13+08:00 (Manila), the official Next.js notice still describes its October 14 security update as planned; affected and fixed ranges have not been published, and the advisory index’s newest publication remains September 30. The working tree uses Next.js 16.4.0 and is based on 79e87a233ee029d885338e71dde341832e2eabb3. Vercel’s latest READY preview still represents that earlier commit, reports live=false, and has SSO protection enabled for all deployments. No public production deployment exists. Supported editable inputs now become fictional presets before writes or responses; deliberate DevTools/runtime tampering remains possible in this client-only demo. The current production dependency audit is clean. The ranges checked for several September issues end at 16.3.8 and do not affect 16.4.0, but the announced upstream advisories are still unknown. Wait for those ranges, compare affected packages with the lockfile, apply any required dependency update, and rerun release checks. See the [official announcement](https://nextjs.org/blog/upcoming-nextjs-security-update-october-2026) and [Next.js advisories](https://github.com/vercel/next.js/security/advisories).
 
 ## Latest local verification
 
 The current working tree passed these checks on October 14, 2026:
 
-- TypeScript, ESLint, and the production-boundary guard. The guard scanned 166 frontend and design-system source/config files.
-- All 4 production-boundary guard tests and 14 unit tests.
-- A fresh optimized Next.js build generated all 32 application routes.
-- All 23 Playwright tests passed serially against that production build on isolated port 6971. The suite includes demo sign-in autofill and dashboard navigation, route coverage, keyboard behavior, form validation, kiosk flows, phone-width controls, same-origin requests, safe URLs, and per-tab isolation. Port 6969 remains the local demo port.
-- `npm audit --omit=dev`: zero production dependency findings.
+- TypeScript, ESLint, and the production-boundary guard. The guard scanned 168 frontend and design-system source/config files.
+- All 4 production-boundary guard tests and 24 unit tests across 6 files. New tests cover input normalization on edit and nested kiosk paths, audit/history safety, and legacy state removal.
+- A fresh optimized Next.js 16.4.0 build generated all 32 application routes.
+- All 23 Playwright tests passed serially against a production build on isolated port 6971. The suite covers demo sign-in autofill and dashboard navigation, route coverage, keyboard behavior, form validation, synthetic contact and kiosk edits, phone-width controls, same-origin requests, safe URLs, and fresh-tab isolation. Port 6969 remains the local demo port.
+- npm audit --omit=dev --audit-level=low at 2026-10-14T00:18:52Z: zero production dependency findings. The full audit reports five High findings in the development-only ESLint dependency chain through braces@3.0.3; npm’s forced fix proposes an incompatible ESLint configuration downgrade.
 - Prettier check passed for the files changed in this release. The repository-wide `npm run format:check` still flags files outside this release patch; unrelated files were not reformatted.
-- Gitleaks scanned the current public tree (about 1.52 MB), excluding generated `.next`, installed dependencies, and test reports; zero leaks were found.
+- Gitleaks scanned all 192 tracked public files at base commit 79e87a233ee029d885338e71dde341832e2eabb3 with zero findings. The exact staged candidate was scanned after the final documentation update; zero findings were reported.
 
-The full `npm audit` reports five High findings through `braces@3.0.3` in the development-only Next.js ESLint dependency chain. No patched `braces` version is published, and `npm audit fix --force` proposes an incompatible downgrade of `eslint-config-next`. `braces` is absent from the production dependency audit. The latest captured audit is `2026-10-13T23:28Z`; recheck this before the release. See [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm).
+The current fixes align seeded opportunity totals with product price, quantity, discount, and 12% VAT; use expected close dates and every product line for opportunity filters; clear a removed sales representative’s name; and use inclusive-start/exclusive-end calendar ranges for activity and audit entries, including combined creation-date and close-date filters.
+
+The development-only audit finding is tracked as [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm). It is not present in the production dependency set. Recheck the audit before publishing.
 
 ## Visual and accessibility evidence
 
@@ -30,11 +32,11 @@ The full `npm audit` reports five High findings through `braces@3.0.3` in the de
 
 ## Production release checks
 
-- Recheck the announced Next.js update and apply any required framework or upstream dependency fix.
+- Recheck the announced Next.js update and apply any required framework or upstream dependency fix. At 2026-10-14T08:40:13+08:00, the official announcement remained pending and the advisory index’s newest publication was dated September 30, 2026.
 - Review the final public tree, asset attributions, production environment variables, and hosted source commit.
-- Keep preview deployments protected. Make the production deployment public only after the verified commit is merged, then confirm anonymous access to the demo URL.
+- Keep preview deployments protected. After the verified commit is merged, scope Vercel SSO protection to previews so production can be public, then confirm anonymous access to the production URL.
 - Verify deployed sign-in, synthetic CRUD flows, same-origin network activity, and per-tab isolation.
 
 ## Known limits
 
-The mock service follows the UI-facing API shapes for included workflows, but it has no server-side persistence, cross-tab synchronization, or complete backend validation and transaction behavior. Visitors can type arbitrary text; persistent notices on CRM and kiosk screens tell them not to enter real customer details.
+The mock service follows the UI-facing API shapes for included workflows, but it has no server-side persistence, cross-tab synchronization, or complete backend validation and transaction behavior. Supported app writes normalize visitor values before storage; deliberate DevTools/runtime tampering remains possible. Browser `sessionStorage` can be copied when a tab is duplicated or opened with an opener, so current tests verify fresh-tab isolation, not every browser duplication behavior.

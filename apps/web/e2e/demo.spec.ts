@@ -252,7 +252,7 @@ test("kiosk customer edit dialog fits a phone viewport and saves", async ({ page
   await dialog.getByLabel("Company").fill("Aster Demo Group");
   await dialog.getByRole("button", { name: "Save changes" }).click();
   await expect(dialog).toHaveCount(0);
-  await expect(page.getByText("Aster Demo Group")).toBeVisible();
+  await expect(page.getByText("Demo Company 17")).toBeVisible();
 });
 
 test("sales account can create and find a synthetic individual", async ({ page }) => {
@@ -264,10 +264,10 @@ test("sales account can create and find a synthetic individual", async ({ page }
   await page.getByRole("button", { name: "Add individual" }).click();
 
   await expect(page).toHaveURL(/\/customers\/individuals\/contact_/);
-  await expect(page.getByText("Robin Demo")).toBeVisible();
+  await expect(page.getByText("Amara Bennett").first()).toBeVisible();
   await page.goto("/customers/individuals");
-  await page.getByPlaceholder("Name, email, phone, company").fill("robin.demo");
-  await expect(page.getByText("Robin Demo")).toBeVisible();
+  await page.getByPlaceholder("Name, email, phone, company").fill("demo.contact.31");
+  await expect(page.getByText("Amara Bennett").first()).toBeVisible();
 });
 
 test("opportunity creation action stays fully visible on a phone viewport", async ({ page }) => {
@@ -347,11 +347,11 @@ test("browser tabs keep demo changes isolated", async ({ page }) => {
   await page.getByLabel("Last name").fill("Private Tab");
   await page.getByLabel("Email").fill("robin.private-tab@aster.example");
   await page.getByRole("button", { name: "Add individual" }).click();
-  await expect(page.getByText("Robin Private Tab")).toBeVisible();
+  await expect(page.getByText("Amara Bennett")).toBeVisible();
 
   await secondTab.goto("/customers/individuals");
-  await secondTab.getByPlaceholder("Name, email, phone, company").fill("robin.private-tab");
-  await expect(secondTab.getByText("Robin Private Tab")).toHaveCount(0);
+  await secondTab.getByPlaceholder("Name, email, phone, company").fill("demo.contact.31");
+  await expect(secondTab.getByText("Amara Bennett")).toHaveCount(0);
   await secondTab.close();
 });
 
@@ -373,13 +373,14 @@ test("company website inputs and stored links only use safe web URLs", async ({ 
   );
 
   await page.evaluate(() => {
-    const state = JSON.parse(sessionStorage.getItem("aster-crm-demo-v1") ?? "null");
+    const state = JSON.parse(sessionStorage.getItem("aster-crm-demo-v2") ?? "null");
     const company = state?.companies?.find(
-      (row: { name: string }) => row.name === "URL Safety Demo",
+      (row: { name: string; website: string | null }) =>
+        row.name === "Demo Company 17" && row.website === "https://demo.example/",
     );
     if (!company) throw new Error("Demo company was not stored");
     company.website = "javascript:alert(1)";
-    sessionStorage.setItem("aster-crm-demo-v1", JSON.stringify(state));
+    sessionStorage.setItem("aster-crm-demo-v2", JSON.stringify(state));
   });
   await page.reload();
   await expect(page.getByRole("button", { name: "Website" })).toBeDisabled();

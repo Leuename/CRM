@@ -108,7 +108,7 @@ export default function LoginPage() {
             }}
           >
             Demo only. <strong>Sign in to demo</strong> fills fictional sample credentials and opens
-            the dashboard.
+            the dashboard. Values entered in the demo become fictional samples when saved.
           </p>
 
           <div

@@ -1,4 +1,6 @@
 /** Fictional, deterministic records for the public Aster CRM demo. */
+export const DEMO_VAT_RATE = 0.12;
+
 export const DEMO_USERS = [
   {
     id: "user_aster_admin",
@@ -392,20 +394,22 @@ export function createDemoSeed(): object {
     const company = companies.find((c) => c.id === contact.company_id)!;
     const product = products[(i * 3) % products.length];
     const stage = DEMO_STAGES[[0, 1, 2, 3, 4, 5, 6, 7][i % 8]];
-    const amount = 480 + ((i * 173) % 4800);
-    const net = (amount * (1 + (i % 3))).toFixed(2);
-    const gross = (Number(net) * 1.08).toFixed(2);
+    const quantity = 1 + (i % 4);
+    const discountPercent = i % 6 === 0 ? 5 : 0;
+    const net = (Number(product.default_price) * quantity * (1 - discountPercent / 100)).toFixed(2);
+    const vat = (Number(net) * DEMO_VAT_RATE).toFixed(2);
+    const gross = (Number(net) + Number(vat)).toFixed(2);
     const line = {
       id: `line_${i + 1}`,
       product_id: product.id,
       product_name: product.name,
       service_term: product.price_unit === "month" ? "MONTHLY" : "ONCE",
       vat_exempt: false,
-      vat_amount: (Number(net) * 0.08).toFixed(2),
+      vat_amount: vat,
       line_total_inc_vat: gross,
-      quantity: String(1 + (i % 4)),
+      quantity: String(quantity),
       unit_price: product.default_price,
-      discount_percent: i % 6 === 0 ? "5.00" : "0.00",
+      discount_percent: discountPercent.toFixed(2),
       line_total: net,
       notes: null,
       start_date: "2026-11-01",
@@ -500,7 +504,7 @@ export function createDemoSeed(): object {
     };
   });
   return {
-    version: 1,
+    version: 2,
     user_id: null as string | null,
     contacts,
     companies,

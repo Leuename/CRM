@@ -1,6 +1,6 @@
 # Synthetic data
 
-All seeded business records are generated in `apps/web/lib/demo-data.ts`; none were derived by renaming or reshaping customer records. Visitors can still type arbitrary values, including real details, into the local demo.
+All seeded business records are generated in `apps/web/lib/demo-data.ts`; none were derived by renaming or reshaping customer records. The mock API replaces visitor-entered business values with fictional presets before storing or returning a record.
 
 | Entity                    |                     Seed amount |
 | ------------------------- | ------------------------------: |
@@ -19,6 +19,8 @@ Each seeded activity refers to its opportunity's primary contact and the same co
 
 The six accounts and common password `demo` are documented in the root README. These credentials are intentionally public demo values and must never be reused for real accounts.
 
-These are synthetic seed values only. Values a visitor types into forms are arbitrary and can be real; the app cannot enforce that visitors use fictional input. Warnings on CRM and kiosk screens, including lookup pages, tell visitors not to enter real customer details.
+Create and edit forms keep their normal workflows, but submitted names, contact details, notes, dates, free text, and non-preset numeric values are converted to fictional sample values at the mock API boundary. Only selected relationships and finite categorical choices are retained. Non-example external company websites are cleared; invalid URL schemes are rejected. CRM, sign-in, and kiosk notices explain that saved values become fictional samples.
+
+The state key moved from `aster-crm-demo-v1` to `aster-crm-demo-v2`. On the next API request, the app removes the old tab-local state and starts from the synthetic seed so values entered with the earlier demo build cannot reappear. Deliberate DevTools edits can still alter a client-only simulator; the UI and role checks are not a security boundary.
 
 State is stored per browser tab and resets on logout. Tabs do not share edits, and there is no persistent server-side dataset.

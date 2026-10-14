@@ -3,11 +3,10 @@
 /* -----------------------------------------------------------------------------
    New inquiry — the kiosk's one write.
 
-   The wizard is a state machine over a single draft; only the last step talks to
-   the server, through POST /api/v1/kiosk/inquiries. That endpoint creates the
-   company, the contact, the opportunity and its product line in ONE transaction,
-   so a walk-in can never be left behind as an orphan contact whose inquiry
-   failed. Nothing is written before Submit — Start over really does clear it.
+   The wizard is a state machine over a single draft. Submit sends one request
+   to the browser-local demo simulator, which creates associated demo records
+   in this tab's session. Nothing is written before Submit — Start over clears
+   the draft. This flow does not use a CRM server or database.
 
    The steps live in Steps.tsx, the after-Submit screens in Outcome.tsx, and the
    rules (what a mobile looks like, what is still missing) in wizard.ts.
@@ -214,8 +213,8 @@ export default function NewInquiry() {
     try {
       const name = splitName(draft.name);
       const inquiry = await createKioskInquiry({
-        // An existing record is referenced, never re-sent: OPERATIONS holds no
-        // edit_contacts, so the server would refuse to rewrite it anyway.
+        // An existing record is referenced, never re-sent. The demo simulator
+        // models the kiosk's limited role and does not edit existing contacts here.
         ...(draft.contactId
           ? { contact_id: draft.contactId }
           : {
@@ -242,9 +241,8 @@ export default function NewInquiry() {
         setOverlay("duplicate");
         return;
       }
-      // No response at all (a dropped Wi-Fi at the desk) gets the screen that
-      // keeps the draft; anything the server actually answered is shown in place
-      // so the operator can see which field it named.
+      // Transport failures keep the draft; validation responses from the local
+      // simulator are shown in place so the operator can see which field failed.
       if (err instanceof ApiError) setError(err);
       else {
         setScreen("offline");

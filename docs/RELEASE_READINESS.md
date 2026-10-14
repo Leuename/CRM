@@ -4,19 +4,20 @@
 
 The Aster CRM demo is a client-side simulator with fictional seed data. Sign-in, roles, and business changes are simulated; supported writes convert editable inputs to fictional presets, and data stays in the current browser tab. It is not suitable for real customer data or production CRM use.
 
-**Do not publish yet.** As of 2026-10-14T08:40:13+08:00 (Manila), the official Next.js notice still describes its October 14 security update as planned; affected and fixed ranges have not been published, and the advisory index’s newest publication remains September 30. The working tree uses Next.js 16.4.0 and is based on 79e87a233ee029d885338e71dde341832e2eabb3. Vercel’s latest READY preview still represents that earlier commit, reports live=false, and has SSO protection enabled for all deployments. No public production deployment exists. Supported editable inputs now become fictional presets before writes or responses; deliberate DevTools/runtime tampering remains possible in this client-only demo. The current production dependency audit is clean. The ranges checked for several September issues end at 16.3.8 and do not affect 16.4.0, but the announced upstream advisories are still unknown. Wait for those ranges, compare affected packages with the lockfile, apply any required dependency update, and rerun release checks. See the [official announcement](https://nextjs.org/blog/upcoming-nextjs-security-update-october-2026) and [Next.js advisories](https://github.com/vercel/next.js/security/advisories).
+**Public production launch is on hold.** As of 2026-10-14T09:13:49+08:00 (Manila), the official Next.js blog still lists its October 14 security update as upcoming; affected and fixed ranges have not been published. It covers three upstream vulnerabilities, two Critical and one High. PR #1's current published commit is `4382e3740f98cd1c2d19a9ebc9f5db71fdffeb12`; both Vercel checks passed, and its READY preview is https://crm-9nwzjjo0n-grade-fit-s-projects.vercel.app. Vercel reports live=false and SSO protection for all deployments, so this remains a protected preview. Supported editable inputs become fictional presets before writes or responses; deliberate DevTools/runtime tampering remains possible in this client-only demo. A fresh production dependency audit is clean. The September advisories checked end at 16.3.8 and do not affect the locked Next.js 16.4.0, but the announced upstream advisories still cannot be mapped to the lockfile. Wait for the official guidance, compare affected packages, apply any required update, and rerun release checks. See the [official Next.js blog](https://nextjs.org/blog) and [Next.js advisories](https://github.com/vercel/next.js/security/advisories).
 
 ## Latest local verification
 
-The current working tree passed these checks on October 14, 2026:
+The release candidate passed these checks on October 14, 2026:
 
 - TypeScript, ESLint, and the production-boundary guard. The guard scanned 168 frontend and design-system source/config files.
 - All 4 production-boundary guard tests and 24 unit tests across 6 files. New tests cover input normalization on edit and nested kiosk paths, audit/history safety, and legacy state removal.
 - A fresh optimized Next.js 16.4.0 build generated all 32 application routes.
 - All 23 Playwright tests passed serially against a production build on isolated port 6971. The suite covers demo sign-in autofill and dashboard navigation, route coverage, keyboard behavior, form validation, synthetic contact and kiosk edits, phone-width controls, same-origin requests, safe URLs, and fresh-tab isolation. Port 6969 remains the local demo port.
-- npm audit --omit=dev --audit-level=low at 2026-10-14T00:18:52Z: zero production dependency findings. The full audit reports five High findings in the development-only ESLint dependency chain through braces@3.0.3; npm’s forced fix proposes an incompatible ESLint configuration downgrade.
+- A fresh `npm audit --omit=dev --audit-level=low` at 2026-10-14T00:42Z found zero production dependency vulnerabilities. The full audit still reports five High findings in the development-only ESLint dependency chain through braces@3.0.3; npm’s forced fix proposes an incompatible ESLint configuration downgrade.
 - Prettier check passed for the files changed in this release. The repository-wide `npm run format:check` still flags files outside this release patch; unrelated files were not reformatted.
-- Gitleaks scanned all 192 tracked public files at base commit 79e87a233ee029d885338e71dde341832e2eabb3 with zero findings. The exact staged candidate was scanned after the final documentation update; zero findings were reported.
+- Gitleaks found zero findings in the 192-file base candidate scan and in a separate scan of all 20 source and status-document files modified in this follow-up. A workspace-wide scan matched only generated `.next` cache and manifest artifacts, not tracked public source.
+- PR #1's Vercel Preview Comments and Vercel deployment checks passed for commit `4382e3740f98cd1c2d19a9ebc9f5db71fdffeb12`; Vercel reports its preview READY.
 
 The current fixes align seeded opportunity totals with product price, quantity, discount, and 12% VAT; use expected close dates and every product line for opportunity filters; clear a removed sales representative’s name; and use inclusive-start/exclusive-end calendar ranges for activity and audit entries, including combined creation-date and close-date filters.
 
@@ -32,9 +33,9 @@ The development-only audit finding is tracked as [GHSA-vfj7-8cjw-p6xm](https://g
 
 ## Production release checks
 
-- Recheck the announced Next.js update and apply any required framework or upstream dependency fix. At 2026-10-14T08:40:13+08:00, the official announcement remained pending and the advisory index’s newest publication was dated September 30, 2026.
+- Recheck the announced Next.js update and apply any required framework or upstream dependency fix. At 2026-10-14T09:13:49+08:00, the official blog still listed the update as upcoming.
 - Review the final public tree, asset attributions, production environment variables, and hosted source commit.
-- Keep preview deployments protected. After the verified commit is merged, scope Vercel SSO protection to previews so production can be public, then confirm anonymous access to the production URL.
+- Keep preview deployments protected. After the security gate clears and the verified commit is merged, scope Vercel SSO protection to previews so production can be public, then confirm anonymous access to the production URL.
 - Verify deployed sign-in, synthetic CRUD flows, same-origin network activity, and per-tab isolation.
 
 ## Known limits

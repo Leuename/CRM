@@ -109,9 +109,8 @@ export function KioskShell({ children }: { children: React.ReactNode }) {
   const [chrome, setChrome] = useState<KioskChrome>({ title: "", subtitle: "" });
   const wrongRole = !isKioskRole(user.role);
 
-  // Mirror of the guard in app/(app)/layout.tsx. UX only: the back office is
-  // built for a mouse and a nav rail, and an ADMIN who lands here has taken a
-  // wrong turn. The server still decides what either of them may read.
+  // Mirror of the demo navigation guard in app/(app)/layout.tsx. This keeps
+  // each simulated role in the intended shell; it is not a security boundary.
   useEffect(() => {
     if (wrongRole) router.replace("/dashboard");
   }, [wrongRole, router]);

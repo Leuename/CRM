@@ -83,9 +83,8 @@ function InquiryCard({ opportunity: o }: { opportunity: OpportunitySummary }) {
         </div>
         <div>
           <div className="k-col-label">Value</div>
-          {/* Not conditional, and never computed: revenue is masked for OPERATIONS
-              server-side ( view_revenue) and no figure belongs on a screen that
-              faces the lobby. */}
+          {/* Not conditional, and never computed: the demo simulator masks
+              revenue for OPERATIONS, and no figure belongs on a lobby screen. */}
           <div className="k-col-value k-masked">•••••</div>
         </div>
       </div>

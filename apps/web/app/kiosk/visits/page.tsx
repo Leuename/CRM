@@ -6,8 +6,8 @@
    The desk's question is "who is expected". The CRM's answer is the activities
    due in the visible range (GET /api/v1/activities?occurred_from&occurred_to),
    which is what the design specifies. Nothing is written from here: arrivals are
-   logged by Sales, so there is no check-in button and OPERATIONS was granted no
-   capability to add one.
+   logged by Sales, so this read-only demo has no check-in button. The simulator
+   does not expose a check-in action for the kiosk role.
 
    Activities carry contact_id but not the contact's name, so the names are
    resolved separately and cached across view changes — a row that says only

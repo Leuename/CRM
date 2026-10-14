@@ -550,10 +550,9 @@
   color: var(--k-muted);
 }
 
-/* Deliberately disabled: OPERATIONS does not hold edit_contacts () and the
-   kiosk is not the place to grant it. The button stays visible so the operator
-   can see the capability exists and ask for it, rather than hunting a missing
-   control. */
+/* Deliberately disabled in this demo role. The button stays visible so the
+   operator can see the modeled capability and ask for it, rather than hunting
+   a missing control. This is a UI cue, not access control. */
 .k-locked {
   height: 52px;
   padding: 0 22px;
@@ -728,8 +727,8 @@
 .k-col-value {
   font: 600 19px/26px var(--font-ui);
 }
-/* Revenue is masked for OPERATIONS by the server: it sends null and the kiosk
-   prints dots. Nothing here computes or infers an amount. */
+/* The browser-local demo simulator masks revenue for OPERATIONS and returns no
+   amount. Nothing here computes or infers a value for this role's demo view. */
 .k-col-value.k-masked {
   letter-spacing: 0.08em;
   color: var(--k-muted);

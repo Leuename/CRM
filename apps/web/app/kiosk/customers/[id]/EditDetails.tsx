@@ -3,26 +3,23 @@
 /* -----------------------------------------------------------------------------
    Edit details.
 
-   NOT DRAWN IN front-desk-design/. The design shows the button — flagged "Needs
-   grant", because OPERATIONS had no capability to edit a customer — but never a
-   screen behind it. Rather than invent a look, this reuses the wizard's step-3
+   NOT DRAWN IN front-desk-design/. The design shows a button flagged "Needs
+   grant" but no screen behind it. This demo adds the flow using the wizard's step-3
    furniture exactly (.k-field, .k-input, .k-form-grid) inside the kiosk's own
    overlay, so it reads as the same product.
 
-   It writes through PATCH /api/v1/kiosk/contacts/{id}, gated on
-   edit_customer_profile: the five fields a front desk corrects, and nothing
-   else. Archiving a customer, editing a company, changing a lead source or a
-   client status are all still beyond this screen and beyond the role.
+   It writes through the browser-local demo simulator, which models a narrow
+   permission for the five fields a front desk corrects. Archiving a customer,
+   editing a company, changing a lead source or client status are outside this
+   flow. The simulated role check is not production authorization.
 
    WHY IT OPENS WITH A REVEAL. The `contact` prop reaches this component masked
-   — an OPERATIONS session does not hold  view_contact_pii, so the record
+   — the demo simulator returns masked values for an OPERATIONS demo user, so the record
    screen behind this dialog is holding "+63 916 ••• 0129", and pre-filling a
    form with that would put bullets in an email field and seven digits in a
-   ten-digit mobile field. The form needs the real values, and there is exactly
-   one endpoint that answers them: POST /kiosk/contacts/{id}/reveal, the same
-   one "Reveal privately" uses. So opening this dialog logs a REVEAL row, which
-   is the honest record of what happens — the operator is now looking at a named
-   person's mobile number and email address on a lobby screen.
+   ten-digit mobile field. The form needs the real values, and the local demo
+   reveal operation returns them for both this dialog and "Reveal privately".
+   Opening this dialog adds a synthetic REVEAL row to this tab's demo audit log.
    -------------------------------------------------------------------------- */
 
 import { useEffect, useRef, useState } from "react";
@@ -133,7 +130,7 @@ export function EditDetails({
 
   const original = draftOf(contact, real);
   const hint = problems(draft);
-  // Only what actually changed is sent: the server refuses an explicit null, and
+  // Only changed fields are sent; the simulator rejects explicit null, and
   // an untouched field has nothing to say.
   const changes = () => {
     const patch: Record<string, string> = {};

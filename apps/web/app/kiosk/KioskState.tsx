@@ -46,16 +46,16 @@ export function KioskEmpty({ title, children }: { title: string; children: React
  * server answered clearly — and named the field — sends them to fetch the
  * service team over a typo.
  *
- * The server's own sentence is always what is shown. Nothing here decides what
- * is valid or who may see what.
+ * The demo simulator's response is shown here. This component only presents
+ * its validation and role messages; those checks are not production security.
  */
 export function KioskError({ error }: { error: unknown }) {
   const api = error instanceof ApiError ? error : null;
   const detail = api?.message ?? (error instanceof Error ? error.message : "Unknown error");
 
   // `fields` is already one displayable string per field — toApiError coerces
-  // the server's arrays at parse time. Pydantic prefixes each with "Value
-  // error, "; stripped for display only, the API response is untouched.
+  // the simulator's arrays at parse time. It prefixes some validation messages
+  // with "Value error, "; that prefix is stripped for display only.
   const fieldMessages = Object.entries(api?.fields ?? {}).map(([field, message]) => ({
     field,
     message: message.replace(/^Value error,\s*/, ""),

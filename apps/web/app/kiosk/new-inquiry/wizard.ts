@@ -1,8 +1,8 @@
 // New-inquiry wizard: the pure part. No React, no network — the rules an
 // operator runs into (what a mobile number looks like, what is still missing
 // before Review opens) live here so they can be tested directly and read in one
-// place. Everything authoritative still happens server-side; nothing here
-// decides whether a write is allowed, only whether the form is worth sending.
+// place. The browser-local demo simulator models submission behavior; these
+// client-side rules are not production validation or write authorization.
 
 import type { Product } from "@/lib/api";
 
@@ -70,8 +70,7 @@ export function formatMobile(digits: string): string {
  * character teaches faster than an error message under the button. The +63
  * beside the field is chrome and never part of the value.
  *
- * The server stays authoritative — this shapes what is typed, it does not
- * decide what is acceptable.
+ * This shapes what is typed; the demo simulator applies its own demo checks.
  */
 export function digitsOnly(value: string): string {
   const digits = (value || "").replace(/\D/g, "");
@@ -80,7 +79,7 @@ export function digitsOnly(value: string): string {
   return start === -1 ? "" : digits.slice(start, start + MOBILE_DIGITS);
 }
 
-/** What the server will be sent as the phone: the +63 the design locks in. */
+/** The phone value submitted to the browser-local demo simulator. */
 export function e164(digits: string): string {
   return `+63${digitsOnly(digits)}`;
 }
@@ -154,8 +153,7 @@ export function rateLabel(product: Product): string {
   return product.price_unit ? `${figure} / ${product.price_unit}` : figure;
 }
 
-/** The machine-stable consent sentence the API appends is built server-side;
- *  this is what the operator reads back to the customer on the review screen. */
+/** The review-screen summary; the demo simulator stores its own fixed consent label. */
 export function consentSummary(draft: Draft): string {
   if (!draft.consent) return "Not given";
   return `Data processing agreed · ${draft.marketing ? "marketing opted in" : "no marketing"}`;

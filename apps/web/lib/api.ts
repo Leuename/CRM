@@ -30,7 +30,7 @@ export interface ContactDetail extends Contact {
 }
 
 // Write shape for POST/PATCH. All optional except first_name on create; the
-// server validates and is the authority on required fields.
+// browser-local simulator validates the required fields for this demo.
 export interface ContactInput {
   first_name?: string;
   last_name?: string | null;
@@ -583,7 +583,7 @@ export interface OpportunityLine {
   quantity: string;
   unit_price: string | null;
   discount_percent: string | null;
-  line_total: string | null; // server-computed; masked → null
+  line_total: string | null; // simulator-computed; masked → null
   notes: string | null;
   start_date: string | null;
   start_time: string | null;
@@ -613,7 +613,7 @@ export interface OpportunityDetail extends OpportunitySummary {
   service_term: ServiceTerm | null;
   vat_exempt: boolean;
   sales_representative_id: string | null;
-  // Resolved server-side, and still returned when the representative has been
+  // Resolved by the demo simulator, and still returned when the representative has been
   // deactivated — retiring someone must not blank the deals they closed.
   sales_representative_name: string | null;
   service_term_text: string | null;
@@ -623,7 +623,7 @@ export interface OpportunityDetail extends OpportunitySummary {
   closed_at: string | null;
   //  Q8. Set on the transition INTO a Lost stage and never cleared by a later
   // move — "why this deal was lost" is history. loss_reason_name is resolved
-  // server-side and is still returned when the reason has been retired.
+  // by the demo simulator and is still returned when the reason has been retired.
   loss_reason_id: string | null;
   loss_reason_name: string | null;
   loss_note: string | null;
@@ -631,8 +631,8 @@ export interface OpportunityDetail extends OpportunitySummary {
 }
 
 // Write shape for a product line. quantity/unit_price/discount_percent are the
-// raw strings the user typed (or null) — never numbers. The server validates and
-// re-computes; the client never submits a line_total.
+// raw strings the user typed (or null) — never numbers. The demo simulator
+// validates and recomputes; the client never submits a line_total.
 export interface OpportunityLineInput {
   product_id: string;
   vat_exempt?: boolean;
@@ -691,8 +691,8 @@ export interface OpportunityCreateInput {
 }
 
 // PATCH /opportunities/{id} body — all fields optional (partial). NO stage_id
-// (transitions go through /stage only). owner_id requires reassign_opportunity_owner
-// server-side (403 otherwise). products present → replace-all; omitted → untouched.
+// (transitions go through /stage only). The demo simulator models owner-change
+// restrictions. products present → replace-all; omitted → untouched.
 export interface OpportunityUpdateInput {
   // no `title` — server-generated (see OpportunityCreateInput)
   primary_contact_id?: string;
@@ -846,8 +846,8 @@ export async function restoreOpportunity(id: string): Promise<void> {
   if (!res.ok) throw await toApiError(res);
 }
 
-// Records a stage transition (always appends a history row server-side). Returns
-// the refreshed detail. 403 when the caller is neither owner nor elevated.
+// Records a stage transition (the simulator appends a history row). Returns the
+// refreshed detail and models role/ownership restrictions for this demo.
 export async function changeStage(
   id: string,
   payload: StageChangeRequest,
@@ -958,7 +958,7 @@ export interface ActivityCreateInput {
 }
 
 // PATCH body — all optional. activity_type may not be set to a system type, and
-// system-type activities cannot be edited at all (server 403).
+// the demo simulator rejects edits to system-type activities.
 export interface ActivityUpdateInput {
   description?: string;
   occurred_at?: string;
@@ -1360,11 +1360,9 @@ export async function setLossReasonRequired(required: boolean): Promise<boolean>
 /* -----------------------------------------------------------------------------
    Kiosk (OPERATIONS front desk)
 
-   One narrow door instead of POST /opportunities: that endpoint is gated on
-   create_opportunities, which also gates PATCH, archive and restore — far more
-   authority than a front desk needs. This endpoint is gated on create_inquiries
-   and cannot carry money, owner, stage or probability at all (the server refuses
-   unknown keys), so a walk-in inquiry is the only thing it can create.
+   One narrow demo request instead of the general opportunity flow. Its input
+   omits money, owner, stage and probability; the browser-local simulator models
+   the available role and write behavior. This is not production authorization.
    -------------------------------------------------------------------------- */
 
 export interface KioskContactInput {
@@ -1411,14 +1409,13 @@ export async function createKioskInquiry(payload: KioskInquiryInput): Promise<Ki
 }
 
 /**
- * The kiosk's narrow customer edit. A separate door from PATCH /contacts/{id},
- * which is gated on edit_contacts — a capability that also carries archiving a
- * customer and editing companies and activities. This one is gated on
- * edit_customer_profile and can only reach the five fields below.
+ * The kiosk's narrow customer edit. The browser-local simulator models a
+ * separate permission from the general contact edit and limits this input to
+ * the five fields below. These demo permissions are not production security.
  *
- * Every field is optional to OMIT. None may be sent as null: the server refuses
- * an explicit null rather than clearing the column. `last_name` and `email`
- * accept "" to clear, matching the rest of the API.
+ * Every field is optional to OMIT. The browser-local demo simulator models
+ * rejecting explicit null rather than clearing a field. `last_name` and `email`
+ * accept "" to clear, matching the rest of the demo API contract.
  */
 export interface KioskContactPatch {
   first_name?: string;
@@ -1443,9 +1440,8 @@ export async function updateKioskContact(
   return (await res.json()) as ContactDetail;
 }
 
-// Exactly the two masked values, and every call writes an audit row — which is
-// why it is a POST and why the kiosk asks the server rather than unmasking what
-// it already holds.
+// Exactly the two masked values; each call adds a synthetic audit row in the
+// browser-local demo state rather than unmasking the loaded record in the UI.
 export interface RevealedContact {
   phone: string | null;
   email: string | null;

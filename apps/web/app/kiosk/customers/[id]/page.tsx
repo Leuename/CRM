@@ -97,9 +97,8 @@ export default function CustomerRecord() {
           </h2>
           <div className="k-company">{contact.company_name ?? "No company on record"}</div>
         </div>
-        {/* Live since edit_customer_profile: a capability that reaches these
-            five fields and nothing else — not archiving, not companies, not
-            activities, all of which edit_contacts would have carried. */}
+        {/* The demo simulator models a narrow edit permission for these five
+            fields; this does not establish a production authorization boundary. */}
         <button type="button" className="k-ghost-btn" onClick={() => setEditing(true)}>
           Edit details
         </button>
@@ -165,8 +164,8 @@ export default function CustomerRecord() {
           contact={contact}
           onClose={() => setEditing(false)}
           onSaved={(updated) => {
-            // The server's own row, not the draft: it normalised the phone and
-            // may have linked a company the kiosk only named.
+            // Use the simulator response, which normalizes the phone and may
+            // link a company that the kiosk only named.
             setState((cur) =>
               cur.status === "ready"
                 ? { status: "ready", record: { ...cur.record, contact: updated } }
@@ -211,11 +210,9 @@ function CurrentSpace({ won }: { won: OpportunityDetail | null }) {
  * Hide now button. Escape closes it and focus returns to "Reveal privately"
  * (useOverlay -> useModalFocus).
  *
- * The values come from POST /api/v1/kiosk/contacts/{id}/reveal rather than from
- * the record already on screen. That is the point: the endpoint writes an audit
- * row naming who revealed whose details, so the design's caption — "this reveal
- * is written to the audit log" — is true. Asking the server for something the
- * page already holds would otherwise be pointless.
+ * The browser-local demo simulator returns the values and adds a synthetic
+ * audit row naming who revealed whose details. The page does not unmask the
+ * already-loaded record directly, which keeps this demo flow consistent.
  */
 const REVEAL_SECONDS = 10;
 

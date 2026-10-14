@@ -8,7 +8,8 @@ import { useAuth } from "@/components/AuthProvider";
 
 // The application navigation uses local SVG icons and keeps its links keyboard reachable.
 // Categories group links while preserving the compact layout on narrow screens.
-// `adminOnly` hides a link; route authorization remains the server's responsibility.
+// `adminOnly` hides a demo navigation link. Role behavior is modeled by the
+// browser-local simulator and is not a production authorization boundary.
 export type NavItem = {
   value: string;
   label: string;

@@ -66,10 +66,9 @@ const EMPTY_FILTERS: DashFilters = {
 // never sums, weights or derives a metric, and it never decides what a user may
 // see — masked money arrives as null and renders "—".
 
-// CONVENIENCE-HIDE ONLY — NOT a security boundary. GET /dashboard/drilldown is
-// require(view_dashboard_drilldown) and 403s every non-admin server-side; this
-// only decides whether the figures get a clickable affordance, so a non-admin
-// sees the dashboard exactly as before — no button, no request, no pixel moved.
+// CONVENIENCE-HIDE ONLY — NOT a security boundary. The browser-local simulator
+// models an admin-only drilldown response; this hides its clickable affordance
+// for other demo roles. A public app would need real server-side authorization.
 // (Same pattern as canConfigurePipeline in app/(app)/pipeline/page.tsx.)
 function canDrillDown(role: string): boolean {
   return role === "ADMIN";

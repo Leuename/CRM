@@ -21,9 +21,9 @@ import { stageCssColor, stageIconClass, stageTintColor } from "@/lib/dashboard";
 // No virtualization; a "first 100" note appears when more exist (see below).
 const BOARD_LIMIT = 100;
 
-// CONVENIENCE-HIDE ONLY — NOT a security boundary. This only hides the admin
-// "Configure stages" shortcut for non-admins; the config route + POST/PATCH
-// stay 403-guarded server-side regardless.
+// CONVENIENCE-HIDE ONLY — NOT a security boundary. This hides the admin
+// "Configure stages" shortcut for other demo roles; the browser-local simulator
+// models the same restriction. A public app needs real server-side authorization.
 function canConfigurePipeline(role: string): boolean {
   return role === "ADMIN";
 }

@@ -17,10 +17,9 @@ export function useAuth(): AuthContextValue {
   return ctx;
 }
 
-// Client guard for the authenticated app. Calls GET /auth/me once: 401 sends
-// the visitor to /login, any other failure shows a reachable error, success
-// exposes { user, signOut }. The server owns capabilities — this only gates
-// "is there a session".
+// Client-side demo session flow. GET /auth/me is handled by the browser-local
+// simulator; it exposes { user, signOut } or redirects to /login. Role checks
+// are simulated too and do not provide production authentication or security.
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [state, setState] = useState<{ user: User } | { error: string } | null>(null);
@@ -49,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   if (state === null) return <FullScreen role="status">Loading</FullScreen>;
   if ("error" in state) {
-    return <FullScreen role="alert">Could not reach the server. {state.error}</FullScreen>;
+    return <FullScreen role="alert">Could not load the demo session. {state.error}</FullScreen>;
   }
 
   return (

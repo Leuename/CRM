@@ -4,7 +4,7 @@
 
 Deliver a public-ready Aster CRM portfolio demo that preserves the existing CRM screens and workflows while replacing the organization identity, colors, business data, and runtime service layer with fictional equivalents.
 
-The project owner confirmed permission to redistribute the copied application and design materials. The source repository remains a separate read-only reference; the target has an independent Git history. The release candidate is commit `4382e3740f98cd1c2d19a9ebc9f5db71fdffeb12` on PR #1's `feat/portfolio-demo` branch. Vercel built that commit as a READY, SSO-protected preview; production remains disabled.
+The project owner confirmed permission to redistribute the copied application and design materials. The source repository remains a separate read-only reference; the target has an independent Git history. At the 2026-10-14T09:19+08:00 (Manila) check, PR #1's `feat/portfolio-demo` branch was at `f7e46599fd874781e270a6e8e43fdc9eee000c41`. Vercel built that commit as a READY, SSO-protected preview; production remains disabled.
 
 ## Included
 
@@ -23,4 +23,4 @@ The project owner confirmed permission to redistribute the copied application an
 
 ## Acceptance status
 
-The application builds locally and the simulator is covered by automated tests. The candidate passes typecheck, lint, 24 unit tests and 4 boundary tests, a production build, and 23 Playwright tests. PR #1's Vercel deployment and preview checks passed for commit `4382e3740f98cd1c2d19a9ebc9f5db71fdffeb12`. Vercel still reports live=false and SSO for all deployments, so production is not publicly accessible. The October 14 Next.js security update remains a release gate. Review release readiness and deployment notes for the remaining gate.
+The application builds locally and the simulator is covered by automated tests. The candidate passes typecheck, lint, 24 unit tests and 4 boundary tests, a production build, and 23 Playwright tests. PR #1's Vercel deployment and preview checks passed for commit `f7e46599fd874781e270a6e8e43fdc9eee000c41`. Vercel still reports live=false and SSO for all deployments, so production is not publicly accessible. The October 14 Next.js security update remains a release gate. Review release readiness and deployment notes for the remaining gate.

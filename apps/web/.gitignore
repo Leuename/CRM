@@ -1,0 +1,15 @@
+node_modules/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+.env*.local
+
+# Written by `next dev`/`next build` on every run.
+AGENTS.md
+CLAUDE.md
+.vercel
+
+# Playwright run output.
+test-results/
+playwright-report/
+blob-report/

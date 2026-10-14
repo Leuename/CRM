@@ -1,0 +1,9 @@
+/* Elevation & borders. The kit uses hairline inset rings far more than drop shadows. */
+:root{
+  --ring-outline:inset 0 0 0 1px var(--outline-resting);
+  --ring-outline-strong:inset 0 0 0 1px var(--primary);
+  --shadow-soft:0 2px 4px rgba(0,0,0,0.10);
+  --shadow-widget:0 4px 12px rgba(153,155,168,0.10);
+  --shadow-status-ring:0 0 0 2px #FFFFFF;
+  --border-hairline:1px solid var(--outline);
+}

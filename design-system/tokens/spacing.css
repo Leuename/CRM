@@ -1,0 +1,34 @@
+/* Spacing, radii and sizing — the kit's real rhythm is a 7px base
+   (7 / 14 / 21 / 28) rather than a 4 or 8px grid. Values are as drawn. */
+:root{
+  --space-2:2px;  --space-4:4px;  --space-7:7px;  --space-8:8px;
+  --space-10:10px; --space-12:12px; --space-14:14px; --space-18:18px;
+  --space-21:21px; --space-24:24px; --space-27:27px; --space-28:28px;
+  --space-40:40px; --space-56:56px;
+
+  /* Radii follow the Aster CRM repo scale (9/10/11/13/16), not the Figma
+     kit's tighter 4/5/6/8/10/12 — the system dresses the shipped app. */
+  --radius-xs:1px;
+  --radius-sm:9px;
+  --radius-input:10px;
+  --radius-pagination:10px;
+  --radius-md:11px;
+  --radius-counter:13px;
+  --radius-card:16px;
+  --radius-pill:999px;
+
+  --control-height-button:46px;
+  --control-height-tab:40px;
+  --control-height-tag:36px;
+  --control-height-field:72px;
+  --control-switch-w:40px;
+  --control-switch-h:22px;
+  --control-checkbox:20px;
+  --control-progress-h:6px;
+
+  --nav-rail-width:84px;
+  --nav-item-height:64px;
+  --nav-topbar-height:84px;
+  --sidebar-width:389px;
+  --card-gutter:28px;
+}

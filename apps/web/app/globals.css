@@ -1,0 +1,2284 @@
+@import "../../../design-system/styles.css";
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--surface-page);
+  color: var(--text-primary);
+  font: 400 14px/21px var(--font-ui);
+}
+
+:focus-visible {
+  outline: 1px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+   App-side token overrides
+   --------------------------------------------------------------------------- */
+:root {
+  /* Motion. Every animation and transition in this file names these. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+
+  /* Secondary copy uses a contrast-safe neutral from the theme. */
+  --text-secondary: #59647b;
+
+  /* App chrome */
+  --nav-width: 224px;
+  --nav-width-collapsed: 64px;
+  --nav-active-ring: rgba(64, 88, 200, 0.22);
+  --row-hover: rgba(64, 88, 200, 0.045);
+  --skeleton-bg: #e4e9f5;
+
+  /* Dashboard chart ramp lives in lib/dashboard.ts (rampTone) — the shade is
+     interpolated per data point, so the endpoints cannot be fixed CSS steps. */
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.app-skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 200;
+  padding: 8px 12px;
+  border: 2px solid var(--primary);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-weight: 700;
+  text-decoration: none;
+  transform: translateY(calc(-100% - 12px));
+}
+
+.app-skip-link:focus {
+  transform: translateY(0);
+}
+
+/* ---------------------------------------------------------------------------
+   Navigation rail (components/AppNav.tsx)
+   --------------------------------------------------------------------------- */
+.app-nav {
+  width: var(--nav-width);
+  flex-shrink: 0;
+  height: 100%;
+  overflow-y: auto;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--outline);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px 12px;
+}
+
+.app-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px 14px;
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.app-nav-mark {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  background: var(--primary);
+  color: var(--text-inverse);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: 800 16px/1 var(--font-ui);
+}
+
+.app-nav-word {
+  font: 800 18px/27px var(--font-ui);
+  letter-spacing: -0.01em;
+}
+
+.app-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* A category: a label over its own list of real links (components/AppNav.tsx). */
+.app-nav-group {
+  margin-top: 10px;
+}
+
+.app-nav-cat {
+  display: block;
+  padding: 0 12px 4px;
+  color: var(--text-secondary);
+  font: 700 11px/16px var(--font-ui);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.app-nav-cat.is-active {
+  color: var(--primary);
+}
+
+.app-nav-sublist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.app-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font: 500 14px/21px var(--font-ui);
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .app-nav-item:hover {
+    background: var(--row-hover);
+    color: var(--text-primary);
+  }
+}
+
+.app-nav-item[aria-current="page"] {
+  background: var(--primary-tint-10);
+  color: var(--primary);
+  font-weight: 700;
+  /* 2px full rounded highlight — a ring around the whole item, not a side stripe. */
+  box-shadow: inset 0 0 0 2px var(--nav-active-ring);
+}
+
+/* Collapsed rail: icon only, label still announced through aria-label. */
+@media (max-width: 1023px) {
+  .app-nav {
+    width: var(--nav-width-collapsed);
+    padding: 22px 8px;
+    align-items: center;
+  }
+  .app-nav-brand {
+    padding: 4px 0 14px;
+  }
+  .app-nav-word {
+    display: none;
+  }
+  .app-nav-list,
+  .app-nav-sublist {
+    width: 100%;
+  }
+  .app-nav-item {
+    justify-content: center;
+    padding: 0;
+  }
+  .app-nav-label {
+    display: none;
+  }
+  /* Category labels do not fit the rail; every leaf below them stays an
+     icon-only link, and the group keeps its name through aria-label. */
+  .app-nav-cat {
+    display: none;
+  }
+  .app-nav-group {
+    margin-top: 8px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   TopBar (components/AppShell.tsx)
+   The DS TopBar h1 has no shrink behaviour, and the user menu beside it is
+   flex-shrink: 0 — so below ~480px the title ran straight under the avatar and
+   name instead of giving way. The title truncates now; the name (which the
+   avatar already carries) drops off the narrowest screens so the title keeps a
+   readable width.
+   --------------------------------------------------------------------------- */
+.app-topbar h1 {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 560px) {
+  .app-username {
+    display: none;
+  }
+  /* !important is load-bearing here, not laziness: the DS TopBar hard-codes
+     `padding: "0 28px"` and AppShell's UserMenu `padding: "0 28px 0 8px"` as
+     INLINE styles, and a normal stylesheet declaration cannot outrank an inline
+     one. Without this the rules silently did nothing — the username hid but the
+     36px it freed was never reclaimed, leaving the title ~30px of content width
+     at 320px, which is an ellipsis and little else. The alternative is editing
+     the shared design system, which has a far wider blast radius than one
+     override scoped to two app-owned classes. */
+  .app-topbar {
+    padding: 0 12px !important;
+  }
+  .app-usermenu {
+    padding: 0 12px 0 8px !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Interaction feedback: buttons, selects, links
+   --------------------------------------------------------------------------- */
+/* The DS sets `transition` inline on Button, so the property list has to be
+   reasserted here to cover transform/filter. Named properties only — never `all`. */
+button,
+select,
+.app-nav-item {
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    filter var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* filter, not background: the DS sets background inline on its buttons. */
+  button:not(:disabled):hover {
+    filter: brightness(0.94);
+  }
+  select:not(:disabled):hover {
+    border-color: var(--primary);
+  }
+}
+
+button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* ---------------------------------------------------------------------------
+   Data tables (DS DataTable — className="crm-table")
+   --------------------------------------------------------------------------- */
+/* The DS sets cell padding inline as `0 0 14px` / `14px 0`, so columns touch
+   edge to edge — that is what glued "Revenue" to "Close date" in the header and
+   the money string to the next cell's em dash. Horizontal padding is added back
+   here; !important is the only lever against an inline style, and vertical
+   padding is left to the DS. */
+.crm-table th,
+.crm-table td {
+  padding-left: 14px !important;
+  padding-right: 14px !important;
+}
+.crm-table th:first-child,
+.crm-table td:first-child {
+  padding-left: 0 !important;
+}
+.crm-table th:last-child,
+.crm-table td:last-child {
+  padding-right: 0 !important;
+}
+
+.crm-table tbody td {
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+@media (max-width: 480px) {
+  .crm-pagination {
+    gap: 8px !important;
+  }
+  .crm-pagination > div {
+    gap: 4px !important;
+  }
+  .crm-pagination .crm-pagination-arrow {
+    width: 32px;
+    height: 32px !important;
+    flex: 0 0 32px;
+    gap: 0 !important;
+  }
+  .crm-pagination .crm-pagination-arrow-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .crm-pagination .crm-pagination-arrow-icon {
+    width: 32px !important;
+    height: 32px !important;
+    flex: 0 0 32px;
+  }
+  .crm-pagination > div > button {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .crm-table tbody tr:hover td {
+    background: var(--row-hover);
+  }
+}
+
+/* The row's primary cell holds a real <a> so the row is keyboard reachable and
+   middle-clickable; the tr onClick still covers the rest of the row. */
+.row-link {
+  color: inherit;
+  text-decoration: none;
+  outline-offset: 3px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .row-link:hover {
+    text-decoration: underline;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Skeletons (components/Skeleton.tsx)
+   --------------------------------------------------------------------------- */
+.skeleton {
+  display: block;
+  background: var(--skeleton-bg);
+  animation: skeleton-pulse 1.2s linear infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Entrances
+   --------------------------------------------------------------------------- */
+/* `backwards` (never `both`): the resting state is the visible one, so content
+   is never left hidden if the animation is skipped. */
+.app-main {
+  animation: enter-up 250ms var(--ease-out) backwards;
+}
+
+.demo-safety-notice {
+  margin: 8px 0 12px;
+  padding: 7px 12px;
+  border: 1px solid #cbd8f6;
+  border-radius: 10px;
+  background: #eef3ff;
+  color: #263b72;
+  font: 500 13px/1.4 var(--font-ui);
+}
+
+.demo-safety-notice strong {
+  font-weight: 700;
+}
+
+@keyframes enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* KPI cards stagger 40ms apart. */
+.kpi-row > * {
+  animation: enter-up 250ms var(--ease-out) backwards;
+}
+.kpi-row > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.kpi-row > *:nth-child(2) {
+  animation-delay: 40ms;
+}
+.kpi-row > *:nth-child(3) {
+  animation-delay: 80ms;
+}
+.kpi-row > *:nth-child(4) {
+  animation-delay: 120ms;
+}
+.kpi-row > *:nth-child(5) {
+  animation-delay: 160ms;
+}
+.kpi-row > *:nth-child(6) {
+  animation-delay: 200ms;
+}
+.kpi-row > *:nth-child(7) {
+  animation-delay: 240ms;
+}
+.kpi-row > *:nth-child(8) {
+  animation-delay: 280ms;
+}
+
+/* Bars grow from the baseline. */
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+/* DS gap: DonutChart writes a different inline stroke-dashoffset on every
+   segment, so one shared stroke-dashoffset keyframe would draw the wrong arcs.
+   The documented fallback (wrapper opacity + scale) is used instead. */
+.chart-donut {
+  animation: donut-enter 320ms var(--ease-out) 380ms backwards;
+}
+@keyframes donut-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+/* Wave sweeps in left to right, last in the entrance sequence. */
+.chart-wave {
+  animation: wave-reveal 520ms var(--ease-out) 440ms backwards;
+}
+@keyframes wave-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Opacity-only entrance for elements that must not move (a label pinned to a
+   plotted point would drift off it). */
+@keyframes fade-only {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Filter modal: overlay fades, panel rises. Same tokens as every other
+   entrance; `backwards` keeps the resting state visible if skipped. */
+.filter-overlay {
+  animation: fade-in-overlay var(--dur-fast) var(--ease-out) backwards;
+}
+@keyframes fade-in-overlay {
+  from {
+    opacity: 0;
+  }
+}
+
+.filter-panel {
+  animation: enter-up var(--dur-base) var(--ease-out) backwards;
+}
+
+/* ---------------------------------------------------------------------------
+   Dashboard (app/(app)/dashboard/page.tsx)
+   Minimal composition per the owner-approved prototype
+   (plan/prototype-dashboard.html): one KPI surface with hairline-divided tiles,
+   de-junked charts (no gridlines, no legends, direct labels), entrance-only
+   motion. Palette is tokens only — no literal hex below.
+   --------------------------------------------------------------------------- */
+.dash {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* The TopBar carries the page title, so this row carries the subtitle on the
+   left and the two triggers (date range, Filters) on the right. */
+.dash-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.dash-head-sub {
+  margin: 0;
+  font: 400 14px/21px var(--font-ui);
+  color: var(--text-secondary);
+}
+.dash-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* The definition marker beside a KPI label. */
+.info-tip {
+  margin-left: 6px;
+  font-size: 14px;
+  line-height: 1;
+  vertical-align: -2px;
+  color: var(--text-secondary);
+  cursor: help;
+}
+
+.dash-alert {
+  margin: 16px 0 0;
+  font: 400 14px/21px var(--font-ui);
+  color: var(--secondary-red);
+}
+
+/* --- KPI band: five separate cards, each with its own comparison ----------- */
+.kpi-band {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 20px;
+}
+.kpi-tile {
+  min-width: 0;
+  /* 20px sides, not the mock's 24: the mock crops the left nav, so its cards are
+     ~30px wider than the real content column and its eyebrow fits on one line. */
+  padding: 22px 20px;
+  background: var(--bg-surface);
+  border: 1px solid var(--outline-hairline);
+  border-radius: 16px;
+}
+
+.kpi-label {
+  display: block;
+  margin-bottom: 12px;
+  font: 700 11px/14px var(--font-ui);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+/* 30px per the mock. Real PHP pipeline values run long, so the card lets a
+   figure break rather than clip it. */
+.kpi-value {
+  display: block;
+  font: 700 30px/38px var(--font-ui);
+  letter-spacing: -0.028em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+/* MEASURED, not chosen: a KPI card is 216px wide at 1440 (the nav takes the
+   rest), leaving 166px of text width, and `₱1,234,567.89` needs 199px at 30px
+   and 159px at 24px. The mock's cards are wider because it crops the nav; a
+   money figure broken across two lines is misread, so money gives up type size
+   rather than the guarantee (e2e/responsive.spec.ts asserts the one line). */
+.kpi-value--money {
+  font-size: 24px;
+  line-height: 34px;
+}
+.kpi-value--masked {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* Comparison line: the delta against the API's previous period, then the period
+   it is measured against. "—" whenever there is no previous figure. */
+.kpi-cmp {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 10px 0 0;
+}
+.kpi-delta {
+  font: 500 12px/17px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.kpi-delta--up {
+  color: var(--secondary-blue);
+}
+.kpi-delta--down {
+  color: var(--secondary-red);
+}
+.kpi-vs {
+  font: 400 12px/17px var(--font-ui);
+  color: var(--text-secondary);
+}
+
+/* --- Panels --------------------------------------------------------------- */
+.dash-row {
+  display: grid;
+  /* The bars panel is the wider of the pair in the mock. */
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 20px;
+  /* stretch (the grid default): the mock's paired panels share one bottom edge.
+     `start` left ~100px of dead canvas under the shorter one. */
+  align-items: stretch;
+}
+/* Row 3: the revenue chart against the narrow summary panel. */
+.dash-row--wave {
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.7fr);
+}
+.dash-panel {
+  min-width: 0;
+  /* A column so a panel that ends in a footer can push it to the bottom edge
+     (.dash-panel-foot's margin-top: auto) once the row stretches both panels. */
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-surface);
+  border: 1px solid var(--outline-hairline);
+  border-radius: 16px;
+  padding: 24px 24px 20px;
+}
+.dash-panel-head {
+  margin-bottom: 24px;
+}
+.dash-panel-head h2 {
+  margin: 0;
+  font: 700 16px/24px var(--font-ui);
+  letter-spacing: -0.008em;
+  color: var(--text-primary);
+}
+.dash-sub {
+  margin: 2px 0 0;
+  font: 400 12px/18px var(--font-ui);
+  color: var(--text-secondary);
+}
+
+/* --- Bars: direct-labelled, one baseline hairline, no grid ---------------- */
+/* 8px, not 14: eight stage columns share ~550px here. The gap is what buys the
+   column its width, and the column has to hold "Confirmation" whole (10px) and
+   a ₱ amount under it without either breaking. */
+.dash-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.dash-bar-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.dash-bar-num {
+  margin-bottom: 8px;
+  text-align: center;
+  font: 500 14px/18px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+.dash-bar {
+  flex: 0 0 auto;
+  border-radius: 4px 4px 0 0;
+  transform-origin: bottom;
+}
+.dash-bars-axis {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--outline-resting);
+}
+/* The name takes whatever lines it needs and the amount is pushed to a shared
+   bottom edge, so a three-line stage name cannot drag its amount out of the row
+   (the prototype's fixed two-line reserve assumed six short stages). */
+.dash-bar-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+/* The mock shows the full stage name over two lines rather than an ellipsis —
+   "Verbal / Email Confirmation" is unreadable clipped. There is no line cap and
+   no ellipsis anywhere: the name takes the lines it needs (see below). */
+.dash-bar-name {
+  flex: 1;
+  /* 10px so a one-word stage ("Negotiation") fits a ~60px column whole; the
+     mock's 11px assumes its wider, nav-less content column. */
+  font: 500 10px/14px var(--font-ui);
+  /* Measured: "Confirmation" is 61.7px at -0.005em against a 61.6px column, so
+     the longest stage word in the seed pipeline broke mid-word by 0.1px. The
+     tighter tracking buys ~1.8px. A word longer still wraps mid-word rather
+     than truncating — a broken word is legible, an ellipsis is not. */
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+  white-space: normal;
+  /* No clamp and no ellipsis: a stage name is never truncated, it takes as many
+     lines as it needs (the axis row stretches, so the amounts stay aligned).
+     break-word rather than anywhere, so a word breaks mid-word only when it
+     cannot fit a line by itself. */
+  overflow-wrap: break-word;
+}
+/* Under ~740px the eight stage columns are too narrow for a horizontal name
+   (the ellipsis clipped most of them to a few characters). Turning the name
+   vertical shows it whole. writing-mode is deliberate over `transform: rotate`:
+   it RESERVES real layout box — the label becomes tall and ~1em wide, the axis
+   row grows to fit, and the panel grows with it — so the page never widens.
+   A transform is visual only, reserves nothing, and would let the rotated text
+   overlap its neighbours or spill past the panel edge (the failure mode every
+   earlier attempt at this hit). The amount is already hidden below 900px, so
+   the cell holds only the name here. */
+@media (max-width: 740px) {
+  .dash-bar-name {
+    writing-mode: vertical-rl;
+    align-self: center;
+    /* Vertical writing reads as one line: the wrap above would otherwise break
+       the rotated label into stacked columns. */
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+  }
+}
+.dash-bar-amt {
+  display: block;
+  margin-top: 3px;
+  /* 10px: `₱549,111.95` at 11px is wider than a stage column at this content
+     width and the amounts touched each other. */
+  font: 400 10px/15px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+/* --- Panel footer: the two pipeline totals under the stages they sum -------- */
+.dash-panel-foot {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: auto; /* sits on the panel's bottom edge, as in the mock */
+  padding-top: 18px;
+  border-top: 1px solid var(--outline-hairline);
+}
+.dash-foot-cell {
+  min-width: 0;
+}
+.dash-foot-cell + .dash-foot-cell {
+  padding-left: 20px;
+  border-left: 1px solid var(--outline-hairline);
+}
+.dash-foot-label {
+  display: block;
+  margin-bottom: 6px;
+  font: 400 12px/18px var(--font-ui);
+  color: var(--text-secondary);
+}
+.dash-foot-val {
+  display: block;
+  font: 700 18px/26px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.012em;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+.dash-foot-val--masked {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* --- Opportunity summary: one bordered pill per outcome ------------------- */
+.dash-sum {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.dash-sum-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--outline-hairline);
+  border-radius: 12px;
+}
+.dash-sum-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--bg-app);
+  color: var(--primary);
+  font-size: 17px;
+}
+.dash-sum-label {
+  flex: 1;
+  min-width: 0;
+  font: 400 12px/18px var(--font-ui);
+  color: var(--text-secondary);
+}
+.dash-sum-num {
+  font: 700 22px/28px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+.dash-sum-money {
+  font: 400 12px/18px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+/* The forecast row carries no count, so its money IS the figure. */
+.dash-sum-money--lead {
+  font: 700 18px/26px var(--font-ui);
+  letter-spacing: -0.012em;
+  color: var(--text-primary);
+}
+
+/* --- Sources: ranked share, one hue, rows are the labels ------------------ */
+.dash-donut-wrap {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+/* The DS DonutChart writes its centre label/caption `font` inline, so CSS needs
+   !important to reach it — the same lever .crm-table uses above. Visual only;
+   no DS file is forked. */
+.dash-donut > div > span:first-child {
+  font: 400 30px/1 var(--font-ui) !important;
+  letter-spacing: -0.03em;
+}
+.dash-donut > div > span:last-child {
+  font: 600 10px/1 var(--font-ui) !important;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.dash-src-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1 1 190px;
+  min-width: 170px;
+}
+.dash-src-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--outline-hairline);
+}
+.dash-src-list li:last-child {
+  border-bottom: 0;
+}
+.dash-src-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+.dash-src-name {
+  flex: 1;
+  min-width: 0;
+  font: 500 13px/19px var(--font-ui);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dash-src-val {
+  font: 500 13px/19px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dash-src-pct {
+  margin-left: 8px;
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* --- Wave: single series, one direct label on the peak -------------------- */
+/* padding-top reserves the peak label's line; the border is the only rule on
+   the whole figure — the DS wave puts its lowest point 4px above it. */
+/* The axis column and the plot beside it; the month row sits under the plot
+   only, so both stay in step. */
+.dash-wave-wrap {
+  display: flex;
+  gap: 10px;
+}
+.dash-wave-y {
+  position: relative;
+  flex: 0 0 auto;
+  width: 62px;
+  margin-top: 26px; /* matches .dash-wave-figure's padding-top */
+  height: 200px; /* WAVE_PX in page.tsx */
+}
+.dash-wave-y span {
+  position: absolute;
+  right: 0;
+  transform: translateY(-50%);
+  font: 400 11px/16px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.dash-wave-main {
+  flex: 1;
+  min-width: 0;
+}
+/* One gridline per axis tick, drawn at the same y the plot maps that value to. */
+.dash-wave-grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--outline-hairline);
+}
+/* The plot is inset so a dot on the first or last month is not half-clipped by
+   the figure's overflow guard. */
+.dash-wave-plot {
+  position: relative;
+  margin: 0 6px;
+}
+.dash-wave-figure {
+  position: relative;
+  padding-top: 26px;
+  /* The peak's direct label is absolutely positioned and, on the last month,
+     translated fully left of its point — at a phone width it still reached a few
+     px past the panel. Clipped rather than allowed to widen the page; the figure
+     it names is repeated in the month row below. */
+  overflow: hidden;
+}
+/* The DS WaveChart stretches a 600-unit viewBox to the panel width
+   (preserveAspectRatio="none"), which smears its 3px stroke horizontally. A CSS
+   declaration beats the SVG presentation attribute, so the stroke is corrected
+   here rather than by forking the component. */
+.dash-wave-figure svg path[stroke] {
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.dash-wave-peak {
+  position: absolute;
+  white-space: nowrap;
+  font: 500 12px/17px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+/* One per plotted month; `top` is written inline from the same mapping the
+   chart uses (waveY in page.tsx). */
+.dash-wave-dot {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 2px var(--bg-surface);
+}
+.dash-wave-months {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+}
+/* Twelve months of `MMM` over a money figure do not fit a phone, and the row was
+   pushing the whole PAGE sideways rather than giving way — the same shape as the
+   bar chart above, and missed by the screenshot sweep because the revenue series
+   paints later than the rest of the dashboard, so a check that ran on load found
+   nothing wrong. It scrolls in place now. */
+@media (max-width: 900px) {
+  .dash-wave-months {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .dash-wave-months::-webkit-scrollbar {
+    display: none;
+  }
+  .dash-wave-months span {
+    flex: 0 0 auto;
+  }
+}
+.dash-wave-months span {
+  min-width: 0;
+  text-align: center;
+  font: 400 11px/16px var(--font-ui);
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+}
+.dash-wave-months b {
+  display: block;
+  margin-top: 2px;
+  font: 500 12px/17px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+/* --- Dashboard entrances (entrance-only; nothing loops) ------------------- */
+.dash-panel {
+  animation: enter-up 250ms var(--ease-out) backwards;
+}
+.dash-panel--bars {
+  animation-delay: 300ms;
+}
+.dash-panel--donut {
+  animation-delay: 340ms;
+}
+.dash-panel--wave {
+  animation-delay: 380ms;
+}
+.dash-panel--summary {
+  animation-delay: 420ms;
+}
+
+.dash-bar {
+  animation: bar-grow 420ms var(--ease-out) backwards;
+}
+.dash-bar-col:nth-child(1) .dash-bar {
+  animation-delay: 360ms;
+}
+.dash-bar-col:nth-child(2) .dash-bar {
+  animation-delay: 390ms;
+}
+.dash-bar-col:nth-child(3) .dash-bar {
+  animation-delay: 420ms;
+}
+.dash-bar-col:nth-child(4) .dash-bar {
+  animation-delay: 450ms;
+}
+.dash-bar-col:nth-child(5) .dash-bar {
+  animation-delay: 480ms;
+}
+.dash-bar-col:nth-child(6) .dash-bar {
+  animation-delay: 510ms;
+}
+.dash-bar-col:nth-child(n + 7) .dash-bar {
+  animation-delay: 540ms;
+}
+
+/* Pinned to a plotted point, so it fades where it is — it never travels. */
+.dash-wave-peak,
+.dash-wave-dot {
+  animation: fade-only 240ms var(--ease-out) 760ms backwards;
+}
+
+/* --- Dashboard responsive ------------------------------------------------ */
+@media (max-width: 1180px) {
+  /* Five across stops fitting: the cards wrap 3 + 2 rather than shrinking a
+     money figure to nothing. */
+  .kpi-band {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+  .kpi-tile {
+    padding: 20px;
+  }
+  .kpi-value {
+    font: 700 26px/32px var(--font-ui);
+  }
+  /* The shorthand above resets the size, so money restates its own. */
+  .kpi-value--money {
+    font-size: 22px;
+  }
+}
+@media (max-width: 1080px) {
+  .dash-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* 900, not 760. Four-up stopped fitting well before the breakpoint said it did:
+   at 768 a tile was ~180px and `PHP 329,064.40` at 24px is wider than that, so
+   overflow-wrap (the last-resort guard against the band CLIPPING a value) fired
+   instead and broke the number across two lines as `329,064.4` / `0`. A figure
+   split by a line break is misread, not merely ugly. Two-up at 768 gives the
+   number ~290px and it sits on one line, which is what the guard is for. */
+@media (max-width: 900px) {
+  .kpi-band {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* A stage column is ~40px below this width and the amount wrapped inside it.
+     The count above each bar still reads, and the drill-down carries the money. */
+  .dash-bar-amt {
+    display: none;
+  }
+  /* The two footer totals stop fitting side by side; the divider becomes the
+     rule between them. */
+  .dash-panel-foot {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .dash-foot-cell + .dash-foot-cell {
+    padding: 16px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--outline-hairline);
+  }
+  /* Money at 11px still needs its column; the axis gives up width first. */
+  .dash-wave-y {
+    width: 52px;
+  }
+}
+/* Two-up stops fitting first: `PHP 2,218,731.25` at 24px needs ~200px and the
+   band clips (overflow:hidden) rather than wrapping. One tile per row below
+   480px, with the hairlines rebuilt for a single column. */
+@media (max-width: 480px) {
+  .kpi-band {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dash-panel {
+    padding: 20px 16px 16px;
+  }
+  .dash-sum-row {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+}
+
+/* Detail-page tab strips. The DS Card header is a non-wrapping flex row and the
+   DS Tabs never shrink, so at 420px the last tab ("Activity" / "History") was
+   clipped at the card edge — reachable, but invisible until you knew it existed.
+   The strip shrinks and scrolls in place rather than pushing the page sideways,
+   and the buttons give up some padding first so scrolling is the last resort.
+   !important on the padding is the same lever .app-topbar documents: the DS sets
+   it as an INLINE style, which a stylesheet rule cannot otherwise outrank. */
+.crm-tabs {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.crm-tabs::-webkit-scrollbar {
+  display: none;
+}
+@media (max-width: 560px) {
+  .crm-tabs button {
+    padding: 0 12px !important;
+  }
+}
+
+/* Every affordance is a real <button> wrapped around the figure that was
+   already on the page, so only the UA chrome is reset here — no layout
+   properties, because the same class sits on elements the rules above lay out
+   (a KPI tile's contents, a bar's label, a source row, a month). A role
+   without the drill-down gets no button at all and therefore no pixel
+   difference: nothing here styles the plain markup. */
+.drill-fig {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+@media (hover: hover) and (pointer: fine) {
+  .drill-fig:hover {
+    color: var(--primary);
+  }
+}
+/* A source row's button takes over the <li>'s own flex layout (dot · name · count). */
+.drill-src {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.drill-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.drill-list li {
+  border-bottom: 1px solid var(--outline-hairline);
+}
+.drill-list li:last-child {
+  border-bottom: 0;
+}
+/* Wraps rather than scrolls sideways: at 420px the money drops under the title
+   instead of pushing the dialog past the viewport. */
+.drill-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding: 12px 4px;
+  text-decoration: none;
+  color: inherit;
+}
+@media (hover: hover) and (pointer: fine) {
+  .drill-row:hover {
+    background: var(--row-hover);
+  }
+}
+.drill-row-main {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+.drill-row-title {
+  display: block;
+  font: 500 14px/21px var(--font-ui);
+  color: var(--text-primary);
+}
+.drill-row-contact {
+  display: block;
+  font: 400 12px/18px var(--font-ui);
+  color: var(--text-secondary);
+}
+.drill-row-money {
+  margin-left: auto;
+  font: 500 13px/19px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+   Detail pages (contact/company): identity rail + main panel on one grid so the
+   two columns share a top edge instead of drifting apart on flex wrap.
+   --------------------------------------------------------------------------- */
+.detail-layout {
+  display: grid;
+  /* minmax(0,1fr): the main panel holds wide tables — without it the column
+     grows past the viewport instead of scrolling inside its own container. */
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .detail-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Pipeline board (stacked stage sections — no horizontal scrolling anywhere)
+   --------------------------------------------------------------------------- */
+.pipeline-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+@media (min-width: 1200px) {
+  .pipeline-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.pipeline-stage-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+/* At the true 4×2 layout the grid fills whatever height its flex parent (the
+   pipeline Card) has left, and both rows split it evenly — the board fits the
+   page instead of growing past it into a scrollbar. Below this width the
+   matrix reflows to 4/8 rows and just takes the height its content needs;
+   .app-main's own scroll area covers that case like it does every other page. */
+@media (min-width: 1180px) {
+  .pipeline-stage-grid {
+    height: 100%;
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+  }
+}
+/* The mock's four columns need room for "Verbal / Email Confirmation" beside a
+   PHP figure at 28px; below ~1180 the four-up cells start clipping both, so the
+   matrix folds to 2 there rather than at the old tablet breakpoint. */
+@media (max-width: 1179px) {
+  .pipeline-stage-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 480px) {
+  .pipeline-stage-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.pipeline-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--outline-resting);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  min-width: 0;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .pipeline-card:hover {
+    background: var(--row-hover);
+    border-color: var(--primary);
+  }
+}
+
+/* Stage summary card (visual reference): a real <button>, so the UA chrome
+   is reset here. --stage-fill / --stage-ink come from the component, which is
+   the only place that knows the stage's palette keyword. */
+.pipeline-stage-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-align: left;
+  padding: 24px 26px;
+  border: none;
+  border-radius: 16px;
+  background: var(--stage-fill, var(--surface-sunken));
+  font: inherit;
+  cursor: pointer;
+}
+/* Tinted ground: the hover tweak the generic .pipeline-card applies would wash
+   the stage colour out, so a stronger ring stands in as the hover state. */
+@media (hover: hover) and (pointer: fine) {
+  .pipeline-stage-card:hover {
+    background: var(--stage-fill, var(--surface-sunken));
+    box-shadow: inset 0 0 0 2px var(--stage-ink, var(--primary));
+  }
+}
+
+/* Top-aligned, not centred: the name may take two lines and the dot and tags
+   belong beside its FIRST line. min-height reserves both lines, so the amount
+   below sits on the same baseline in every card whatever the name's length. */
+.pipeline-stage-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 52px;
+  flex-shrink: 0;
+}
+.pipeline-stage-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--stage-ink, var(--secondary-grey));
+  flex-shrink: 0;
+  /* Centres the dot on the 26px first line rather than on the whole block. */
+  margin-top: 6px;
+}
+/* A stage name is never truncated — "Verbal / Email Confi…" is unreadable. It
+   wraps instead; `anywhere` so a single long word breaks rather than pushing
+   the card wide. */
+.pipeline-stage-name {
+  font: 700 18px/26px var(--font-ui);
+  color: var(--text-primary);
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+/* Won / Lost / Deactivated: the DS tag is 36px tall against a 26px line, so it
+   is pulled up to sit centred on the first line of the name. */
+.pipeline-stage-head > span:not(.pipeline-stage-dot):not(.pipeline-stage-name) {
+  margin-top: -5px;
+}
+/* The mock's 28px figure lives in a 385px card; four of our cells fit in a
+   narrower content column (the mock crops the left nav), so the figure is sized
+   to stay on ONE line at the width it actually has — wrapping "PHP 448,949.20"
+   over two rows breaks the card rhythm far more visibly than a point or two of
+   size. Never wraps; if a future currency is longer it ellipsizes instead. */
+.pipeline-stage-amount {
+  margin-top: 14px;
+  font: 700 26px/34px var(--font-ui);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* The figure is the card's headline number — under vertical squeeze (short
+     viewport, forced-height board) it must never shrink to nothing. If space
+     truly runs out, .pipeline-card's overflow:hidden clips the FOOT below
+     instead (see .pipeline-stage-foot), never this. */
+  flex-shrink: 0;
+}
+/* Narrowest four-up cells: just above the 2-column fold. */
+@media (min-width: 1180px) and (max-width: 1339px) {
+  .pipeline-stage-amount {
+    font-size: 21px;
+    line-height: 30px;
+  }
+}
+/* Pinned to the bottom of the tall card, as in the mock. flex-shrink: 0 so
+   under squeeze it stays full size and gets clipped whole by the card's
+   overflow:hidden — a clean cut, not a squashed icon. */
+.pipeline-stage-foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 24px;
+  flex-shrink: 0;
+}
+.pipeline-stage-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  color: var(--stage-ink, var(--secondary-grey));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+/* --text-secondary on a tinted ground is not the 4.6:1 it measures on white, so
+   the count keeps the ink colour. */
+.pipeline-stage-count {
+  font: 600 14px/20px var(--font-ui);
+  color: var(--text-primary);
+  min-width: 0;
+}
+@media (max-width: 900px) {
+  .pipeline-stage-amount {
+    font: 700 22px/30px var(--font-ui);
+  }
+}
+
+/* The stage's deals, opened in a modal. Fade + rise only — same idiom as
+   .filter-panel/.drill-panel, no measured-height animation. */
+.pipeline-modal-panel {
+  animation: enter-up var(--dur-base) var(--ease-out) backwards;
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion: opacity fades only, capped at 200ms. No transforms, no
+   clip-path reveals, no chart draw-ons.
+   --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .app-main,
+  .kpi-row > * {
+    animation: fade-in 200ms linear backwards;
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .dash-bar,
+  .chart-wave {
+    animation: none;
+  }
+  /* Opacity only, no delay chain: the shorthand resets the staggered delays. */
+  .chart-donut,
+  .dash-panel,
+  .dash-wave-peak,
+  .dash-wave-dot {
+    animation: fade-in 200ms linear backwards;
+  }
+
+  /* Opacity only — no rise. */
+  .filter-panel {
+    animation: fade-in 200ms linear backwards;
+  }
+  .pipeline-modal-panel {
+    animation: fade-in 200ms linear backwards;
+  }
+  .filter-overlay {
+    animation: fade-in 200ms linear backwards;
+  }
+
+  button:not(:disabled):active {
+    transform: none;
+  }
+
+  button,
+  select,
+  .app-nav-item {
+    transition:
+      background-color var(--dur-fast) linear,
+      color var(--dur-fast) linear,
+      border-color var(--dur-fast) linear,
+      box-shadow var(--dur-fast) linear,
+      filter var(--dur-fast) linear !important;
+  }
+}
+
+.crm-field {
+  display: block;
+  padding-top: 10px;
+}
+
+.crm-field-label {
+  display: block;
+  margin-bottom: 6px;
+  font: 500 14px/21px var(--font-ui);
+  color: var(--text-primary);
+}
+
+/* Holds the chevron/icon overlay of a select against the box's right edge. */
+.crm-field-control {
+  position: relative;
+  display: block;
+}
+
+.crm-field-box {
+  width: 100%;
+  height: 40px;
+  box-sizing: border-box;
+  border: 1px solid var(--outline-resting);
+  border-radius: var(--radius-input);
+  outline: none;
+  background: var(--bg-surface);
+  padding: 0 12px;
+  font: 400 14px/21px var(--font-ui);
+  color: var(--text-primary);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.crm-field-box::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 1;
+}
+/* Focus ring is drawn inside the border (DS readme: "primary at 1px inset"),
+   so the box never grows and neighbouring fields never shift. */
+.crm-field-box:focus {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+/* Disabled dims the whole field — label and hint included — so it never reads
+   as "an active label over a dead box". One rule, wherever the control sits. */
+.crm-field:has(:disabled) {
+  opacity: 0.4;
+}
+.crm-field-box:disabled {
+  cursor: default;
+}
+.crm-field-box[aria-invalid="true"] {
+  border-color: var(--secondary-red);
+}
+
+/* Product-line cells: the same box, one size down so a row of them fits. */
+.crm-field-box--sm {
+  height: 36px;
+  padding: 0 10px;
+}
+
+textarea.crm-field-box {
+  height: auto;
+  min-height: 96px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+/* Native chevron off; the overlay below is coloured from a token instead. */
+select.crm-field-box {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 34px;
+  cursor: pointer;
+}
+select.crm-field-box:disabled {
+  cursor: default;
+}
+
+.crm-field-chevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  line-height: 1;
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.crm-field-hint {
+  display: block;
+  margin-top: 6px;
+  font: 400 12px/18px var(--font-ui);
+  color: var(--text-secondary);
+}
+
+/* Character counter under a textarea (mock section 5). */
+.crm-field-count {
+  display: block;
+  margin-top: 6px;
+  text-align: right;
+  font: 400 12px/18px var(--font-ui);
+  color: var(--text-secondary);
+}
+
+/* A value the form shows but does not own: same box, no interactive weight. */
+.crm-field-readonly {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  box-sizing: border-box;
+  border: 1px solid var(--outline-resting);
+  border-radius: var(--radius-input);
+  background: var(--surface-sunken);
+  padding: 8px 12px;
+  font: 400 14px/21px var(--font-ui);
+  color: var(--text-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crm-field-box {
+    transition:
+      border-color var(--dur-fast) linear,
+      box-shadow var(--dur-fast) linear;
+  }
+}
+
+/* The page header above the card: breadcrumb + back link, then the task title. */
+.opp-page-head {
+  margin-bottom: 20px;
+}
+
+/* The shared Card header keeps its title and action on one row. The collapsed
+   navigation leaves a narrow content column on phones, so stack this list's
+   create action instead of clipping its label at the card edge. */
+@media (max-width: 480px) {
+  .opportunities-list-card > header {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+}
+
+.opp-page-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.opp-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 400 12px/18px var(--font-ui);
+  color: var(--text-secondary);
+}
+.opp-crumbs a {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+.opp-crumbs a:hover {
+  color: var(--primary);
+}
+/* A link, dressed as the mock's outline button — it navigates, so it stays an
+   anchor rather than becoming a button that calls router.push. */
+.opp-page-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--outline-resting);
+  border-radius: var(--radius-input);
+  background: var(--bg-surface);
+  font: 500 14px/21px var(--font-ui);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.opp-page-back:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.opp-page-title {
+  margin: 20px 0 0;
+  font: 700 26px/34px var(--font-ui);
+  color: var(--text-primary);
+}
+.opp-page-sub {
+  margin: 6px 0 0;
+  font: 400 14px/21px var(--font-ui);
+  color: var(--text-secondary);
+}
+
+.opp-form-banners {
+  padding: 20px 24px 0;
+}
+.opp-form-banners > [role="alert"]:last-child {
+  margin-bottom: 0;
+}
+
+/* A section is a numbered rail plus its body; the rail's connector line runs
+   down to the next number, which is what makes the five read as one sequence. */
+.opp-form-section {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 0 16px;
+  padding: 24px;
+  border-top: 1px solid var(--outline-hairline);
+}
+.opp-form-section:first-of-type {
+  border-top: none;
+}
+
+.opp-form-section-rail {
+  position: relative;
+}
+.opp-form-section-rail::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 34px;
+  bottom: -24px;
+  width: 1px;
+  background: var(--outline-hairline);
+}
+/* Nothing follows the last number, so nothing to connect to. */
+.opp-form-section:last-of-type .opp-form-section-rail::after {
+  display: none;
+}
+
+.opp-form-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.opp-form-section-title {
+  margin: 0;
+  font: 700 16px/24px var(--font-ui);
+  color: var(--text-primary);
+}
+.opp-form-section-sub {
+  margin: 4px 0 0;
+  font: 400 12px/18px var(--font-ui);
+  color: var(--text-secondary);
+}
+
+.opp-form-section-num {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--primary);
+  font: 700 12px/1 var(--font-ui);
+  color: var(--outline-white);
+}
+
+/* The footer of the mock: primary + Cancel over a hairline. */
+.opp-form-footer {
+  display: flex;
+  gap: 12px;
+  padding: 24px;
+  border-top: 1px solid var(--outline-hairline);
+}
+
+.opp-form-subhead {
+  margin: 20px 0 0;
+  font: 700 13px/20px var(--font-ui);
+  color: var(--text-secondary);
+}
+
+/* The paired-field layout. Named for the opportunity form it started in; the
+   contact/company/product/stage forms share it now, which is also how they
+   inherited the ≤768px stack their inline grids never had.
+   Flex-wrap, not a fixed 2-column grid: a field's width stays human-sized
+   (260–420px, wide enough for "Sales representative", never a stretched
+   near-empty box) and MORE fields flow onto one row as the container gets
+   wider, rather than the existing two growing to fill it. At the narrow
+   820px cap the other four forms use, that is still exactly two per row —
+   this only changes anything once a container is wide enough for a third. */
+.opp-form-grid-2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 40px;
+}
+.opp-form-grid-2 > * {
+  flex: 1 1 260px;
+  max-width: 420px;
+  min-width: 0;
+}
+
+.opp-form-note,
+.opp-form-empty {
+  margin: 8px 0 0;
+  font: 400 13px/20px var(--font-ui);
+  color: var(--text-secondary);
+}
+.opp-form-empty {
+  padding: 8px 0;
+}
+
+.opp-form-estimate {
+  margin-top: 12px;
+  text-align: right;
+  font: 400 13px/20px var(--font-ui);
+  color: var(--text-secondary);
+}
+
+/* Lead type — the first question, and the one that decides what else is asked */
+.opp-lead-type {
+  border: none;
+  margin: 0 0 4px;
+  padding: 0;
+}
+/* Two cards, capped so a wide form doesn't stretch a 40px icon and two lines
+   of text across an otherwise-empty 700px box. */
+.opp-lead-type-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 4px;
+}
+.opp-lead-type-cards > * {
+  flex: 1 1 260px;
+  max-width: 360px;
+}
+/* A card that IS its radio — the label wraps a real <input type="radio">, so
+   arrow keys, the roving focus and the accessible name are the native ones. */
+.opp-lead-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--outline-resting);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  cursor: pointer;
+}
+.opp-lead-card.is-selected {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+  background: var(--primary-tint-10);
+}
+.opp-lead-card:focus-within {
+  border-color: var(--primary);
+}
+.opp-lead-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: var(--radius-input);
+  background: var(--surface-sunken);
+  font-size: 20px;
+  color: var(--text-secondary);
+}
+.opp-lead-card.is-selected .opp-lead-card-icon {
+  background: var(--bg-surface);
+  color: var(--primary);
+}
+.opp-lead-card b {
+  display: block;
+  font: 700 14px/21px var(--font-ui);
+  color: var(--text-primary);
+}
+.opp-lead-card em {
+  display: block;
+  font: 400 12px/18px var(--font-ui);
+  font-style: normal;
+  color: var(--text-secondary);
+}
+
+/* Section 2: the tall contact box and its "New contact" button. Capped so the
+   picker doesn't stretch edge-to-edge on a wide form — a 56px-tall select
+   spanning 1200px reads like a search bar that lost its results. */
+.opp-contact-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  max-width: 640px;
+}
+.opp-contact-box {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-top: 0;
+}
+.opp-contact-select {
+  height: 56px;
+  /* The sub-line sits in the lower half of the box, so the select's own text is
+     pushed into the upper half rather than centred over it. */
+  padding-bottom: 20px;
+  font-weight: 500;
+}
+.opp-contact-sub {
+  position: absolute;
+  left: 13px;
+  bottom: 8px;
+  font: 400 12px/18px var(--font-ui);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.opp-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font: 400 14px/21px var(--font-ui);
+  color: var(--text-primary);
+}
+
+.opp-inline-customer {
+  margin-top: 4px;
+  padding: 4px 16px 16px;
+  border-left: 3px solid var(--primary);
+  background: var(--surface-sunken, rgba(127, 127, 127, 0.05));
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.opp-dup-warning {
+  margin: 16px 0;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: rgba(200, 146, 47, 0.12);
+  font: 400 14px/21px var(--font-ui);
+}
+
+/* Tablet and below: the paired columns stack rather than squeeze. 768px is the
+   width slice 9 promises to stay usable at. */
+@media (max-width: 768px) {
+  .opp-form-grid-2 {
+    gap: 0;
+  }
+  .opp-form-grid-2 > * {
+    flex-basis: 100%;
+    max-width: none;
+  }
+  .opp-lead-type-cards > * {
+    flex-basis: 100%;
+    max-width: none;
+  }
+  .opp-form-section {
+    padding: 20px 16px;
+  }
+  .opp-contact-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .opp-form-section-head {
+    flex-wrap: wrap;
+  }
+}
+
+/* ── Product lines (visual reference) ────────────────────────────
+   A table: a header row of column names, then per line the priced row, its
+   service schedule and a quieter VAT/notes row. The three rows of one line stay
+   inside one bordered group so a five-line deal never leaves a date row
+   orphaned from the price it belongs to (the mock shows a single line, where
+   the two readings look the same). */
+
+.opp-line-table {
+  border: 1px solid var(--outline-resting);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* One template, shared by the header row and every priced row, so the columns
+   line up without a <table>'s layout rules. */
+.opp-line-head-row,
+.opp-line-cells {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 2.2fr) 70px 100px minmax(150px, 1fr) minmax(90px, 1fr)
+    44px;
+  gap: 0 16px;
+  align-items: center;
+}
+
+.opp-line-head-row {
+  padding: 12px 16px;
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--outline-resting);
+  font: 400 12px/18px var(--font-ui);
+  color: var(--text-secondary);
+}
+
+.opp-line-card + .opp-line-card {
+  border-top: 1px solid var(--outline-resting);
+}
+
+.opp-line-cells {
+  padding: 12px 16px;
+}
+
+/* The header row names the columns, so each cell's own label is for assistive
+   tech only — the same trick as .sr-only, applied by position. */
+.opp-line-cells .crm-field-label,
+.opp-line-cell-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.opp-line-cells .crm-field,
+.opp-line-service-period .crm-field,
+.opp-line-extra .crm-field {
+  padding-top: 0;
+}
+.opp-line-service-period .crm-field-label,
+.opp-line-extra .crm-field-label {
+  margin-bottom: 4px;
+  font: 500 12px/18px var(--font-ui);
+}
+.opp-line-cells .crm-field-box,
+.opp-line-service-period .crm-field-box,
+.opp-line-extra .crm-field-box {
+  height: 36px;
+  padding: 0 10px;
+}
+.opp-line-cells select.crm-field-box,
+.opp-line-service-period select.crm-field-box {
+  padding-right: 30px;
+}
+.opp-line-cells .crm-field-chevron {
+  font-size: 15px;
+  right: 10px;
+}
+
+/* Discount is a checkbox plus, once ticked, its percentage. */
+.opp-line-discount {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.opp-line-discount-pct {
+  width: 110px;
+}
+/* Bare box (no .crm-field wrapper), so it needs the app's disabled dim itself. */
+.opp-line-discount-pct:disabled {
+  opacity: 0.4;
+}
+
+.opp-line-subtotal {
+  font: 500 14px/21px var(--font-ui);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.opp-line-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--outline-resting);
+  border-radius: var(--radius-input);
+  background: var(--bg-surface);
+  font-size: 18px;
+  color: var(--secondary-red);
+  cursor: pointer;
+}
+.opp-line-remove:hover {
+  border-color: var(--secondary-red);
+}
+
+.opp-line-service-period {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+  padding: 0 16px 12px;
+}
+
+/* Quieter than the priced row above it: the exception, not the rule. */
+.opp-line-extra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--outline-hairline);
+  background: var(--surface-sunken);
+}
+.opp-line-extra .crm-field {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+.opp-line-vat-note {
+  font: 400 12px/18px var(--font-ui);
+  color: var(--text-secondary);
+}
+
+/* Tablet and below: the priced row stops pretending to be a table. */
+@media (max-width: 900px) {
+  .opp-line-head-row {
+    display: none;
+  }
+  .opp-line-cells {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 16px;
+    align-items: end;
+  }
+  .opp-line-cells .crm-field-label,
+  .opp-line-cell-label {
+    position: static;
+    display: block;
+    width: auto;
+    height: auto;
+    clip: auto;
+    clip-path: none;
+    margin-bottom: 4px;
+    font: 500 12px/18px var(--font-ui);
+    color: var(--text-primary);
+  }
+  .opp-line-discount {
+    flex-wrap: wrap;
+  }
+  .opp-line-discount .opp-line-cell-label {
+    flex: 1 0 100%;
+  }
+  .opp-line-subtotal {
+    align-self: end;
+  }
+}
+
+@media (max-width: 480px) {
+  .opp-line-cells {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Opportunity detail ────────────────────────────────────────────────────
+   No mock exists for this screen, so it borrows the vocabulary of the two that
+   do: the form's page header (.opp-page-head*) above the card, the form's
+   section rhythm inside it (24px padding, a hairline between blocks), and the
+   line table's sunken header row for the products table. */
+
+.opp-detail-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 24px;
+}
+.opp-detail-tags {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.opp-detail-revenue {
+  text-align: right;
+}
+.opp-detail-amount {
+  font: 700 22px/32px var(--font-ui);
+  color: var(--text-primary);
+}
+.opp-detail-actions {
+  display: flex;
+  gap: 9px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+/* The stage/reassign controls are a second block of the same card, separated
+   the way the form separates two sections rather than by a second card. */
+.opp-detail-controls {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  padding: 20px 24px 24px;
+  border-top: 1px solid var(--outline-hairline);
+}
+
+/* The read-only counterpart of .crm-field-label/.crm-field-box: a value the
+   page states rather than a box it invites you to type in. */
+.opp-detail-label {
+  font: 500 12px/18px var(--font-ui);
+  color: var(--text-secondary);
+}
+.opp-detail-value {
+  margin-top: 2px;
+  font: 500 14px/21px var(--font-ui);
+  color: var(--text-primary);
+}
+
+.opp-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.opp-detail-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.opp-detail-table th {
+  padding: 12px 16px 12px 0;
+  text-align: left;
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--outline-resting);
+  font: 500 12px/18px var(--font-ui);
+  color: var(--text-secondary);
+}
+.opp-detail-table td {
+  padding: 12px 16px 12px 0;
+  border-bottom: 1px solid var(--outline-hairline);
+  font: 400 14px/21px var(--font-ui);
+  color: var(--text-primary);
+}
+.opp-detail-table th:first-child,
+.opp-detail-table td:first-child {
+  padding-left: 16px;
+}
+.opp-detail-num {
+  text-align: right;
+}
+/* The total is a summary of the rows above it, not another row. */
+.opp-detail-table tfoot td {
+  border-bottom: none;
+  font-weight: 700;
+}
+
+.opp-detail-hist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.opp-detail-hist li {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--outline-hairline);
+}
+.opp-detail-hist li:last-child {
+  border-bottom: none;
+}
+.opp-detail-hist-title {
+  font: 700 14px/21px var(--font-ui);
+  color: var(--text-primary);
+}
+
+/* The same widths the form reflows at: three columns of read-only text stop
+   fitting well before the page itself runs out of room. */
+@media (max-width: 900px) {
+  .opp-detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 768px) {
+  .opp-detail-summary {
+    padding: 20px 16px;
+  }
+  .opp-detail-controls {
+    padding: 20px 16px;
+  }
+  /* Right-aligned money under a left-aligned tag row reads as a stray column
+     once the two stack; at this width they are one list. */
+  .opp-detail-revenue {
+    text-align: left;
+  }
+  .opp-detail-actions {
+    justify-content: flex-start;
+  }
+}
+@media (max-width: 480px) {
+  .opp-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}

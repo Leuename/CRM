@@ -22,15 +22,6 @@ type State = {
 
 const STORE_KEY = "aster-crm-demo-v2";
 const LEGACY_STORE_KEY = "aster-crm-demo-v1";
-const SYNTHETIC_NOTE = "Fictional sample note for the Aster CRM demo.";
-const SAFE_ACTIVITY_TIMES = [
-  "2026-10-13T00:00:00.000Z",
-  "2026-10-13T23:59:59.999Z",
-  "2026-10-12T23:59:59.999Z",
-  "2026-10-14T00:00:00.000Z",
-];
-const SAFE_QUANTITIES = ["1", "2", "3", "4"];
-const SAFE_PRICES = ["100.00", "250.00", "500.00", "750.00", "1000.00"];
 const MONEY_ROLES = new Set(["ADMIN", "MANAGER", "SALES", "FINANCE"]);
 const PROBABILITY_ROLES = new Set(["ADMIN", "MANAGER"]);
 
@@ -47,8 +38,7 @@ class HttpFailure extends Error {
 }
 
 function readState(): State {
-  // Older demo builds allowed free-form values. Drop that tab-local state so
-  // records entered before synthetic-only writes cannot reappear after upgrade.
+  // Start from the current storage format and discard the older tab-local key.
   sessionStorage.removeItem(LEGACY_STORE_KEY);
   const stored = sessionStorage.getItem(STORE_KEY);
   if (stored) {
@@ -120,15 +110,6 @@ function companyWebsite(value: unknown): string | null {
   return normalized;
 }
 
-function syntheticWebsite(value: unknown): unknown {
-  if (value == null || (typeof value === "string" && !value.trim())) return value;
-  if (typeof value !== "string") return value;
-  const normalized = normalizeExternalUrl(value);
-  if (!normalized) return value; // Preserve the existing validator's generic error behavior.
-  const hostname = new URL(normalized).hostname.toLowerCase();
-  return hostname === "example" || hostname.endsWith(".example") ? normalized : null;
-}
-
 function payload(init?: RequestInit): Row {
   if (!init?.body || typeof init.body !== "string") return {};
   try {
@@ -141,112 +122,6 @@ function payload(init?: RequestInit): Row {
 
 function has(input: Row, key: string): boolean {
   return Object.prototype.hasOwnProperty.call(input, key);
-}
-
-function hasText(value: unknown): value is string {
-  return typeof value === "string" && value.trim().length > 0;
-}
-
-function copySafeText(output: Row, input: Row, key: string, replacement: string) {
-  if (!has(input, key)) return;
-  if (input[key] === null || (typeof input[key] === "string" && !input[key].trim())) {
-    output[key] = input[key];
-  } else if (hasText(input[key])) {
-    output[key] = replacement;
-  }
-}
-
-function copyBoolean(output: Row, input: Row, key: string) {
-  if (typeof input[key] === "boolean") output[key] = input[key];
-}
-
-function fixtureIndex(index: number, length: number): number {
-  return Math.max(0, index - 1) % Math.max(1, length);
-}
-
-function sampleContactInput(input: Row, state: State, contactId?: string): Row {
-  const seeds = createDemoSeed() as unknown as State;
-  const existingIndex = contactId ? state.contacts.findIndex((item) => item.id === contactId) : -1;
-  const index = existingIndex >= 0 ? existingIndex + 1 : state.contacts.length + 1;
-  const sample = seeds.contacts[fixtureIndex(index, seeds.contacts.length)];
-  const output: Row = {};
-  copySafeText(output, input, "first_name", sample.first_name);
-  copySafeText(output, input, "last_name", sample.last_name);
-  if (has(input, "email")) {
-    output.email =
-      input.email === null || input.email === ""
-        ? input.email
-        : hasText(input.email)
-          ? `demo.contact.${index}@aster.example`
-          : null;
-  }
-  if (has(input, "phone")) {
-    output.phone =
-      input.phone === null || input.phone === ""
-        ? input.phone
-        : hasText(input.phone)
-          ? `+1-202-555-01${String(index % 100).padStart(2, "0")}`
-          : null;
-  }
-  copySafeText(output, input, "position", sample.position);
-  if (
-    has(input, "client_status") &&
-    ["NEW_CLIENT", "EXISTING_CLIENT"].includes(input.client_status)
-  )
-    output.client_status = input.client_status;
-  if (has(input, "company_id"))
-    output.company_id =
-      input.company_id === null || state.companies.some((item) => item.id === input.company_id)
-        ? input.company_id
-        : null;
-  if (has(input, "source_id"))
-    output.source_id =
-      input.source_id === null || state.sources.some((item) => item.id === input.source_id)
-        ? input.source_id
-        : null;
-  if (Array.isArray(input.tags)) output.tags = input.tags.length ? sample.tags : [];
-  copySafeText(output, input, "notes", SYNTHETIC_NOTE);
-  if (typeof input.confirm_duplicate === "boolean")
-    output.confirm_duplicate = input.confirm_duplicate;
-  return output;
-}
-
-function sampleCompanyInput(input: Row, state: State, companyId?: string): Row {
-  const existingIndex = companyId ? state.companies.findIndex((item) => item.id === companyId) : -1;
-  const index = existingIndex >= 0 ? existingIndex + 1 : state.companies.length + 1;
-  const output: Row = {};
-  const name = `Demo Company ${index}`;
-  copySafeText(output, input, "name", name);
-  copySafeText(output, input, "legal_name", `${name}, LLC`);
-  if (has(input, "industry"))
-    output.industry =
-      input.industry === null || input.industry === "" ? input.industry : "Advisory";
-  if (has(input, "website")) output.website = syntheticWebsite(input.website);
-  if (has(input, "phone"))
-    output.phone =
-      input.phone === null || input.phone === ""
-        ? input.phone
-        : hasText(input.phone)
-          ? `+1-202-555-02${String(index % 100).padStart(2, "0")}`
-          : null;
-  if (has(input, "employee_count")) {
-    output.employee_count =
-      input.employee_count === null ? null : [6, 12, 24, 48][fixtureIndex(index, 4)];
-  }
-  if (has(input, "billing_address")) {
-    output.billing_address =
-      input.billing_address === null
-        ? null
-        : {
-            street: `${100 + fixtureIndex(index, 80)} Sample Avenue`,
-            city: "Example City",
-            province: "Demo Province",
-            postal_code: "00000",
-            country: "United States",
-          };
-  }
-  copySafeText(output, input, "notes", SYNTHETIC_NOTE);
-  return output;
 }
 
 function validReference(
@@ -267,254 +142,248 @@ function validReference(
   return typeof value === "string" && state[collection].some((item) => item.id === value);
 }
 
-function sampleProductLine(input: Row, state: State, index: number): Row {
-  const selected = validReference(state, "products", input.product_id)
-    ? state.products.find((item) => item.id === input.product_id)!
-    : (state.products.find((item) => item.active) ?? state.products[0]);
-  const output: Row = { product_id: selected.id };
-  if (typeof input.vat_exempt === "boolean") output.vat_exempt = input.vat_exempt;
-  if (has(input, "quantity")) {
-    const quantity = String(input.quantity);
-    output.quantity = SAFE_QUANTITIES.includes(quantity)
-      ? quantity
-      : SAFE_QUANTITIES[fixtureIndex(index, 4)];
-  }
-  if (has(input, "unit_price"))
-    output.unit_price = input.unit_price === null ? null : selected.default_price;
-  if (has(input, "discount_percent"))
-    output.discount_percent = ["0.00", "5.00"][fixtureIndex(index, 2)];
-  copySafeText(output, input, "notes", SYNTHETIC_NOTE);
-  if (has(input, "start_date"))
-    output.start_date =
-      input.start_date === null || input.start_date === "" ? input.start_date : "2026-11-01";
-  if (has(input, "start_time"))
-    output.start_time =
-      input.start_time === null || input.start_time === "" ? input.start_time : "09:00";
-  if (has(input, "end_date"))
-    output.end_date =
-      input.end_date === null || input.end_date === "" ? input.end_date : "2027-10-31";
-  if (has(input, "end_time"))
-    output.end_time = input.end_time === null || input.end_time === "" ? input.end_time : "17:00";
-  copySafeText(output, input, "preferred_schedule", "Weekdays, 9am–5pm");
+function strings(input: Row, fields: readonly string[]): Row {
+  const output: Row = {};
+  for (const key of fields)
+    if (has(input, key) && (input[key] === null || typeof input[key] === "string"))
+      output[key] = input[key];
   return output;
 }
 
-function sampleOpportunityInput(input: Row, state: State, opportunityId?: string): Row {
-  const seeds = createDemoSeed() as unknown as State;
-  const index = opportunityId
-    ? Math.max(1, state.opportunities.findIndex((item) => item.id === opportunityId) + 1)
-    : state.opportunities.length + 1;
+function numbers(input: Row, fields: readonly string[]): Row {
   const output: Row = {};
-  for (const key of ["primary_contact_id", "company_id"] as const) {
-    const collection = key === "primary_contact_id" ? "contacts" : "companies";
-    if (has(input, key))
-      output[key] =
-        input[key] === null || validReference(state, collection, input[key]) ? input[key] : null;
-  }
-  if (has(input, "owner_id") && DEMO_USERS.some((item) => item.id === input.owner_id))
-    output.owner_id = input.owner_id;
-  if (has(input, "new_company") && input.new_company && typeof input.new_company === "object")
-    output.new_company = sampleCompanyInput(input.new_company, state);
-  if (has(input, "new_contact") && input.new_contact && typeof input.new_contact === "object")
-    output.new_contact = sampleContactInput(input.new_contact, state);
-  if (has(input, "expected_close_date"))
-    output.expected_close_date =
-      input.expected_close_date === null || input.expected_close_date === ""
-        ? input.expected_close_date
-        : seeds.opportunities[fixtureIndex(index, seeds.opportunities.length)].expected_close_date;
-  if (has(input, "currency")) output.currency = "USD";
-  if (has(input, "team_size"))
-    output.team_size = input.team_size === null ? null : [4, 8, 12, 16][fixtureIndex(index, 4)];
-  if (has(input, "service_start_date"))
-    output.service_start_date =
-      input.service_start_date === null || input.service_start_date === ""
-        ? input.service_start_date
-        : "2026-11-01";
-  if (has(input, "service_end_date"))
-    output.service_end_date =
-      input.service_end_date === null || input.service_end_date === ""
-        ? input.service_end_date
-        : "2027-10-31";
-  if (has(input, "service_start_time"))
-    output.service_start_time =
-      input.service_start_time === null || input.service_start_time === ""
-        ? input.service_start_time
-        : "09:00";
-  if (has(input, "service_end_time"))
-    output.service_end_time =
-      input.service_end_time === null || input.service_end_time === ""
-        ? input.service_end_time
-        : "17:00";
-  if (
-    has(input, "service_term") &&
-    ["ONCE", "DAILY", "WEEKLY", "MONTHLY", "ANNUALLY"].includes(input.service_term)
+  for (const key of fields)
+    if (
+      has(input, key) &&
+      (input[key] === null || (typeof input[key] === "number" && Number.isFinite(input[key])))
+    )
+      output[key] = input[key];
+  return output;
+}
+
+function booleans(input: Row, fields: readonly string[]): Row {
+  const output: Row = {};
+  for (const key of fields) if (typeof input[key] === "boolean") output[key] = input[key];
+  return output;
+}
+
+function contactInput(input: Row, state: State): Row {
+  const output = {
+    ...strings(input, [
+      "first_name",
+      "last_name",
+      "email",
+      "phone",
+      "position",
+      "client_status",
+      "company_id",
+      "source_id",
+      "notes",
+    ]),
+    ...booleans(input, ["confirm_duplicate"]),
+  };
+  if (output.client_status && !["NEW_CLIENT", "EXISTING_CLIENT"].includes(output.client_status))
+    delete output.client_status;
+  if (output.company_id && !validReference(state, "companies", output.company_id))
+    output.company_id = null;
+  if (output.source_id && !validReference(state, "sources", output.source_id))
+    output.source_id = null;
+  if (Array.isArray(input.tags) && input.tags.every((tag: unknown) => typeof tag === "string"))
+    output.tags = input.tags.slice(0, 50);
+  return output;
+}
+
+function companyInput(input: Row): Row {
+  const output = {
+    ...strings(input, ["name", "legal_name", "industry", "website", "phone", "notes"]),
+    ...numbers(input, ["employee_count"]),
+  };
+  if (input.billing_address === null) output.billing_address = null;
+  else if (
+    input.billing_address &&
+    typeof input.billing_address === "object" &&
+    !Array.isArray(input.billing_address)
   )
-    output.service_term = input.service_term;
-  if (typeof input.vat_exempt === "boolean") output.vat_exempt = input.vat_exempt;
-  if (has(input, "sales_representative_id"))
-    output.sales_representative_id =
-      input.sales_representative_id === null ||
-      validReference(state, "reps", input.sales_representative_id)
-        ? input.sales_representative_id
-        : null;
-  if (has(input, "selling_price_ex_vat")) {
-    const price = String(input.selling_price_ex_vat);
-    output.selling_price_ex_vat =
-      input.selling_price_ex_vat === null || input.selling_price_ex_vat === ""
-        ? input.selling_price_ex_vat
-        : SAFE_PRICES.includes(price)
-          ? price
-          : "750.00";
+    output.billing_address = strings(input.billing_address, [
+      "street",
+      "city",
+      "province",
+      "postal_code",
+      "country",
+    ]);
+  return output;
+}
+
+function opportunityLineInput(input: Row, state: State): Row {
+  const output = {
+    ...strings(input, [
+      "product_id",
+      "quantity",
+      "unit_price",
+      "discount_percent",
+      "notes",
+      "start_date",
+      "start_time",
+      "end_date",
+      "end_time",
+      "preferred_schedule",
+    ]),
+    ...booleans(input, ["vat_exempt"]),
+  };
+  if (!validReference(state, "products", output.product_id)) delete output.product_id;
+  return output;
+}
+
+function opportunityInput(input: Row, state: State, isCreate: boolean): Row {
+  const output = {
+    ...strings(input, [
+      "primary_contact_id",
+      "company_id",
+      "expected_close_date",
+      "service_term",
+      "sales_representative_id",
+      "selling_price_ex_vat",
+      "discount_percent",
+      "currency",
+      "notes",
+      "owner_id",
+      "reason",
+      "loss_reason_id",
+      "loss_note",
+    ]),
+    ...numbers(input, ["team_size"]),
+    ...booleans(input, ["vat_exempt"]),
+  };
+  if (output.primary_contact_id && !validReference(state, "contacts", output.primary_contact_id))
+    output.primary_contact_id = null;
+  if (output.company_id && !validReference(state, "companies", output.company_id))
+    output.company_id = null;
+  if (
+    output.sales_representative_id &&
+    !validReference(state, "reps", output.sales_representative_id)
+  )
+    output.sales_representative_id = null;
+  if (output.loss_reason_id && !validReference(state, "loss_reasons", output.loss_reason_id))
+    output.loss_reason_id = null;
+  if (output.owner_id && !DEMO_USERS.some((user) => user.id === output.owner_id))
+    delete output.owner_id;
+  if (
+    output.service_term &&
+    !["ONCE", "DAILY", "WEEKLY", "MONTHLY", "ANNUALLY"].includes(output.service_term)
+  )
+    delete output.service_term;
+  if (isCreate) {
+    if (
+      input.new_contact &&
+      typeof input.new_contact === "object" &&
+      !Array.isArray(input.new_contact)
+    )
+      output.new_contact = contactInput(input.new_contact, state);
+    if (
+      input.new_company &&
+      typeof input.new_company === "object" &&
+      !Array.isArray(input.new_company)
+    )
+      output.new_company = companyInput(input.new_company);
   }
-  if (has(input, "discount_percent"))
-    output.discount_percent =
-      input.discount_percent === null || input.discount_percent === ""
-        ? input.discount_percent
-        : "5.00";
-  copySafeText(output, input, "notes", SYNTHETIC_NOTE);
   if (Array.isArray(input.products))
     output.products = input.products
       .filter(
         (line: unknown): line is Row =>
           Boolean(line) && typeof line === "object" && !Array.isArray(line),
       )
-      .map((line: Row, lineIndex: number) => sampleProductLine(line, state, index + lineIndex));
+      .slice(0, 50)
+      .map((line: Row) => opportunityLineInput(line, state));
   return output;
 }
 
-function sampleActivityInput(input: Row, state: State, activityId?: string): Row {
-  const seeds = createDemoSeed() as unknown as State;
-  const existingIndex = activityId
-    ? state.activities.findIndex((item) => item.id === activityId)
-    : -1;
-  const index = existingIndex >= 0 ? existingIndex + 1 : state.activities.length + 1;
-  const sample = seeds.activities[fixtureIndex(index, seeds.activities.length)];
-  const output: Row = {};
-  if (
-    has(input, "activity_type") &&
-    ["CALL", "EMAIL", "MEETING", "SITE_VISIT", "NOTE"].includes(input.activity_type)
-  )
-    output.activity_type = input.activity_type;
-  copySafeText(output, input, "description", sample.description);
-  for (const key of ["contact_id", "company_id", "opportunity_id"] as const) {
-    const collection =
-      key === "contact_id" ? "contacts" : key === "company_id" ? "companies" : "opportunities";
-    if (has(input, key))
-      output[key] =
-        input[key] === null || validReference(state, collection, input[key]) ? input[key] : null;
-  }
-  if (has(input, "occurred_at")) {
-    const newActivityOffset = Math.max(0, state.activities.length - seeds.activities.length);
-    output.occurred_at = SAFE_ACTIVITY_TIMES[newActivityOffset % SAFE_ACTIVITY_TIMES.length];
-  }
-  return output;
-}
-
-/** Replace every visitor-supplied business value before mock handlers can persist or echo it. */
-function syntheticMutationPayload(state: State, url: URL, method: string, raw: Row): Row {
+/** Preserve supported edit values while dropping unknown fields and unsafe object shapes. */
+function editableMutationPayload(state: State, url: URL, method: string, raw: Row): Row {
   if (!["POST", "PATCH", "PUT"].includes(method)) return {};
   const path = url.pathname.replace(/^\/api\/v1/, "").replace(/\/$/, "") || "/";
   const [root, id, action] = path.split("/").filter(Boolean);
-  if (root === "auth") return raw;
-  if (root === "contacts" && (!id || !action))
-    return sampleContactInput(raw, state, method === "PATCH" ? id : undefined);
-  if (root === "companies" && (!id || !action))
-    return sampleCompanyInput(raw, state, method === "PATCH" ? id : undefined);
-  if (root === "products" && (!id || !action)) {
-    const index = id
-      ? Math.max(1, state.products.findIndex((item) => item.id === id) + 1)
-      : state.products.length + 1;
-    const seeds = createDemoSeed() as unknown as State;
-    const output: Row = {};
-    copySafeText(output, raw, "name", `Demo Service ${index}`);
-    if (has(raw, "category"))
-      output.category = raw.category === null || raw.category === "" ? raw.category : "Advisory";
-    copySafeText(output, raw, "description", "A fictional advisory service for the demo catalog.");
-    if (has(raw, "default_price"))
-      output.default_price =
-        raw.default_price === null || raw.default_price === ""
-          ? raw.default_price
-          : seeds.products[fixtureIndex(index, seeds.products.length)].default_price;
-    if (has(raw, "currency")) output.currency = "USD";
-    copyBoolean(output, raw, "active");
-    return output;
-  }
+  if (root === "auth" && id === "login") return strings(raw, ["email", "password"]);
+  if (root === "contacts" && (!id || !action)) return contactInput(raw, state);
+  if (root === "companies" && (!id || !action)) return companyInput(raw);
+  if (root === "products" && (!id || !action))
+    return {
+      ...strings(raw, ["name", "category", "description", "default_price", "currency"]),
+      ...booleans(raw, ["active"]),
+    };
   if (root === "opportunities" && id && action === "stage") {
-    const output: Row = {};
-    if (validReference(state, "stages", raw.to_stage_id)) output.to_stage_id = raw.to_stage_id;
-    if (validReference(state, "loss_reasons", raw.loss_reason_id))
-      output.loss_reason_id = raw.loss_reason_id;
-    copySafeText(output, raw, "reason", "Fictional demo stage update.");
-    copySafeText(output, raw, "loss_note", SYNTHETIC_NOTE);
+    const output = strings(raw, ["to_stage_id", "loss_reason_id", "reason", "loss_note"]);
+    if (!validReference(state, "stages", output.to_stage_id)) delete output.to_stage_id;
+    if (output.loss_reason_id && !validReference(state, "loss_reasons", output.loss_reason_id))
+      delete output.loss_reason_id;
     return output;
   }
-  if (root === "opportunities" && (!id || !action))
-    return sampleOpportunityInput(raw, state, method === "PATCH" ? id : undefined);
+  if (root === "opportunities" && (!id || !action)) return opportunityInput(raw, state, !id);
   if (root === "pipeline-stages" && (!id || !action)) {
-    const index = id
-      ? Math.max(1, state.stages.findIndex((item) => item.id === id) + 1)
-      : state.stages.length + 1;
-    const output: Row = {};
-    copySafeText(output, raw, "name", `Demo stage ${index}`);
-    if (has(raw, "semantic_type") && ["ACTIVE", "WON", "LOST"].includes(raw.semantic_type))
-      output.semantic_type = raw.semantic_type;
-    if (has(raw, "probability")) output.probability = [20, 45, 70, 90][fixtureIndex(index, 4)];
-    if (has(raw, "sort_order")) output.sort_order = index;
-    if (has(raw, "color")) {
-      if (raw.color === "green") output.color = "blue";
-      else if (
-        ["slate", "cyan", "orange", "yellow", "purple", "blue", "indigo", "red"].includes(raw.color)
+    const output = {
+      ...strings(raw, ["name", "semantic_type", "probability", "color"]),
+      ...numbers(raw, ["sort_order"]),
+      ...booleans(raw, ["active"]),
+    };
+    if (output.color === "green") output.color = "blue";
+    if (output.semantic_type && !["ACTIVE", "WON", "LOST"].includes(output.semantic_type))
+      delete output.semantic_type;
+    if (
+      output.color &&
+      !["slate", "cyan", "orange", "yellow", "purple", "blue", "indigo", "red"].includes(
+        output.color,
       )
-        output.color = raw.color;
+    )
+      delete output.color;
+    return output;
+  }
+  if (root === "activities" && (!id || !action)) {
+    const output = strings(raw, [
+      "activity_type",
+      "description",
+      "occurred_at",
+      "contact_id",
+      "company_id",
+      "opportunity_id",
+    ]);
+    for (const key of ["contact_id", "company_id", "opportunity_id"] as const) {
+      const collection =
+        key === "contact_id" ? "contacts" : key === "company_id" ? "companies" : "opportunities";
+      if (output[key] && !validReference(state, collection, output[key])) output[key] = null;
     }
-    copyBoolean(output, raw, "active");
     return output;
   }
-  if (root === "activities" && (!id || !action))
-    return sampleActivityInput(raw, state, method === "PATCH" ? id : undefined);
-  if (root === "sales-representatives" && (!id || !action)) {
-    const index = id
-      ? Math.max(1, state.reps.findIndex((item) => item.id === id) + 1)
-      : state.reps.length + 1;
-    const output: Row = {};
-    copySafeText(output, raw, "name", `Demo Representative ${index}`);
-    copyBoolean(output, raw, "active");
-    if (has(raw, "sort_order")) output.sort_order = index;
-    return output;
-  }
+  if (root === "sales-representatives" && (!id || !action))
+    return {
+      ...strings(raw, ["name"]),
+      ...numbers(raw, ["sort_order"]),
+      ...booleans(raw, ["active"]),
+    };
   if (root === "settings" && id === "loss-reason-required")
     return { required: raw.required === true };
   if (root === "kiosk" && id === "inquiries") {
-    const output: Row = {};
-    if (validReference(state, "contacts", raw.contact_id)) output.contact_id = raw.contact_id;
-    if (raw.new_contact && typeof raw.new_contact === "object")
-      output.new_contact = sampleContactInput(raw.new_contact, state);
-    if (typeof raw.company_name === "string")
-      output.company_name = hasText(raw.company_name)
-        ? `Demo Company ${state.companies.length + 1}`
-        : "";
-    if (validReference(state, "products", raw.product_id)) output.product_id = raw.product_id;
-    else
-      output.product_id = state.products.find((item) => item.active)?.id ?? state.products[0]?.id;
-    output.consent = raw.consent === true;
-    output.marketing_opt_in = raw.marketing_opt_in === true;
-    if (has(raw, "confirm_duplicate") && typeof raw.confirm_duplicate === "boolean")
-      output.confirm_duplicate = raw.confirm_duplicate;
-    copySafeText(output, raw, "notes", SYNTHETIC_NOTE);
+    const output = {
+      ...strings(raw, ["contact_id", "company_name", "product_id", "notes"]),
+      ...booleans(raw, ["consent", "marketing_opt_in", "confirm_duplicate"]),
+    };
+    if (output.contact_id && !validReference(state, "contacts", output.contact_id))
+      output.contact_id = null;
+    if (!validReference(state, "products", output.product_id)) delete output.product_id;
+    if (raw.new_contact === null) output.new_contact = null;
+    else if (
+      raw.new_contact &&
+      typeof raw.new_contact === "object" &&
+      !Array.isArray(raw.new_contact)
+    )
+      output.new_contact = strings(raw.new_contact, ["first_name", "last_name", "email", "phone"]);
     return output;
   }
-  if (root === "kiosk" && id === "contacts" && action && !path.split("/").filter(Boolean)[3]) {
-    const output = sampleContactInput(raw, state, action);
-    if (has(raw, "company_name"))
-      output.company_name =
-        raw.company_name === null || raw.company_name === ""
-          ? raw.company_name
-          : `Demo Company ${state.companies.length + 1}`;
-    return output;
-  }
+  if (root === "kiosk" && id === "contacts" && action && !path.split("/").filter(Boolean)[3])
+    return {
+      ...strings(raw, ["first_name", "last_name", "email", "phone", "company_name"]),
+      ...booleans(raw, ["confirm_duplicate"]),
+    };
   return {};
 }
-
 function now() {
   return new Date().toISOString();
 }
@@ -1836,7 +1705,7 @@ export async function demoFetch(input: RequestInfo | URL, init?: RequestInit): P
       state,
       url,
       method,
-      syntheticMutationPayload(state, url, method, payload(init)),
+      editableMutationPayload(state, url, method, payload(init)),
     );
     if (response.status !== 204) writeState(state);
     return response;

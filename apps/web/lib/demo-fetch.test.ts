@@ -23,7 +23,6 @@ import {
   listActivities,
   listAudit,
   listOpportunities,
-  listSalesRepresentatives,
   login,
   logout,
   revealKioskContact,
@@ -196,8 +195,8 @@ describe("Aster demo API session", () => {
       occurred_to: "2026-10-14T00:00:00.000Z",
     });
     const filteredIds = filtered.items.map((item) => item.id);
-    expect(filteredIds).toEqual(expect.arrayContaining([boundaryIds[0], boundaryIds[1]]));
-    expect(filteredIds).not.toContain(boundaryIds[2]);
+    expect(filteredIds).toEqual(expect.arrayContaining([boundaryIds[1], boundaryIds[2]]));
+    expect(filteredIds).not.toContain(boundaryIds[0]);
     expect(filteredIds).not.toContain(boundaryIds[3]);
   });
 
@@ -351,107 +350,148 @@ describe("Aster demo API session", () => {
     expect((await getCompany(company.id)).website).toBe("https://demo.example/");
   });
 
-  it("stores and returns only fictional presets from editable and nested demo fields", async () => {
+  it("keeps editable CRUD values only in this tab and drops unknown fields", async () => {
     await login("admin@aster.example", "demo");
-    const sentinel = "SENTINEL_PRIVATE_8712";
+    const sentinel = "EDITABLE_DEMO_8712";
 
     const contact = await createContact({
-      first_name: sentinel,
+      first_name: "Robin",
       last_name: sentinel,
-      email: `${sentinel}@private.test`,
-      phone: "+1-415-555-0199",
+      email: "robin.editable@example.com",
+      phone: "(202) 555-0129",
       notes: sentinel,
+      tags: ["demo", sentinel],
     });
-    expect(JSON.stringify(contact)).not.toContain(sentinel);
-    expect(contact.email).toMatch(/^demo\.contact\.\d+@aster\.example$/);
+    expect(contact.first_name).toBe("Robin");
+    expect(contact.last_name).toBe(sentinel);
+    expect(contact.email).toBe("robin.editable@example.com");
+    expect(contact.phone).toBe("(202) 555-0129");
+    expect(contact.notes).toBe(sentinel);
+
     const updatedContact = await updateContact(contact.id, {
-      first_name: sentinel,
-      email: `${sentinel}.update@private.test`,
-      notes: sentinel,
-    });
-    expect(JSON.stringify(updatedContact)).not.toContain(sentinel);
+      first_name: "Robin Updated",
+      email: "robin.updated@example.com",
+      notes: `${sentinel}_UPDATED`,
+      id: "contact_intruder",
+      created_by: "user_intruder",
+      archived_at: "2040-02-03T04:05:06.000Z",
+    } as unknown as Parameters<typeof updateContact>[1]);
+    expect(updatedContact.id).toBe(contact.id);
+    expect(updatedContact.first_name).toBe("Robin Updated");
+    expect(updatedContact.email).toBe("robin.updated@example.com");
+    expect(updatedContact.notes).toBe(`${sentinel}_UPDATED`);
+    expect(updatedContact.archived_at).toBeNull();
     const kioskUpdatedContact = await updateKioskContact(contact.id, {
-      first_name: sentinel,
-      email: `${sentinel}.kiosk@private.test`,
-      company_name: sentinel,
+      first_name: "Robin at the demo desk",
+      email: "robin.desk@example.com",
+      company_name: "Aster Demo Group",
     });
-    expect(JSON.stringify(kioskUpdatedContact)).not.toContain(sentinel);
+    expect(kioskUpdatedContact.first_name).toBe("Robin at the demo desk");
+    expect(kioskUpdatedContact.company_name).toBe("Aster Demo Group");
 
     const company = await createCompany({
-      name: sentinel,
+      name: `${sentinel} Company`,
       website: "https://private.example.com",
-      billing_address: { street: sentinel, city: sentinel, postal_code: "94105" },
+      billing_address: { street: `${sentinel} Street`, city: "Example City", postal_code: "94105" },
       notes: sentinel,
     });
-    expect(JSON.stringify(company)).not.toContain(sentinel);
-    expect(company.name).toMatch(/^Demo Company \d+$/);
-    expect(company.website).toBeNull();
+    expect(company.name).toBe(`${sentinel} Company`);
+    expect(company.website).toBe("https://private.example.com/");
+    expect(company.billing_address?.street).toBe(`${sentinel} Street`);
+    expect(company.notes).toBe(sentinel);
+    const updatedCompany = await updateCompany(company.id, { name: `${sentinel} Updated` });
+    expect(updatedCompany.name).toBe(`${sentinel} Updated`);
 
     const product = await createProduct({
-      name: sentinel,
-      category: sentinel,
+      name: `${sentinel} Service`,
+      category: "Demo category",
       description: sentinel,
-      default_price: "987654.32",
+      default_price: "9876.54",
     });
-    expect(JSON.stringify(product)).not.toContain(sentinel);
-    expect(product.name).toMatch(/^Demo Service \d+$/);
+    expect(product.name).toBe(`${sentinel} Service`);
+    expect(product.category).toBe("Demo category");
+    expect(product.description).toBe(sentinel);
+    expect(product.default_price).toBe("9876.54");
     const updatedProduct = await updateProduct(product.id, {
-      name: sentinel,
-      description: sentinel,
-      default_price: "999999.99",
+      name: `${sentinel} Service Updated`,
+      default_price: "9999.99",
     });
-    expect(JSON.stringify(updatedProduct)).not.toContain(sentinel);
+    expect(updatedProduct.name).toBe(`${sentinel} Service Updated`);
+    expect(updatedProduct.default_price).toBe("9999.99");
 
     const stage = await createPipelineStage({
-      name: sentinel,
+      name: `${sentinel} Stage`,
       semantic_type: "ACTIVE",
       probability: "43",
+      color: "green",
     });
-    const updatedStage = await updatePipelineStage(stage.id, { name: sentinel });
-    expect(JSON.stringify(updatedStage)).not.toContain(sentinel);
-    expect(updatedStage.name).toMatch(/^Demo stage \d+$/);
+    expect(stage.name).toBe(`${sentinel} Stage`);
+    expect(stage.probability).toBe(43);
+    expect(stage.color).toBe("blue");
+    const updatedStage = await updatePipelineStage(stage.id, { name: `${sentinel} Stage Updated` });
+    expect(updatedStage.name).toBe(`${sentinel} Stage Updated`);
 
-    const representative = await createSalesRepresentative({ name: sentinel });
+    const representative = await createSalesRepresentative({ name: `${sentinel} Representative` });
+    expect(representative.name).toBe(`${sentinel} Representative`);
     const updatedRepresentative = await updateSalesRepresentative(representative.id, {
-      name: sentinel,
+      name: `${sentinel} Representative Updated`,
     });
-    expect(JSON.stringify(updatedRepresentative)).not.toContain(sentinel);
-    expect(updatedRepresentative.name).toMatch(/^Demo Representative \d+$/);
-    expect(JSON.stringify(await listSalesRepresentatives())).not.toContain(sentinel);
+    expect(updatedRepresentative.name).toBe(`${sentinel} Representative Updated`);
 
     const opportunity = await createOpportunity({
       new_contact: {
-        first_name: sentinel,
+        first_name: "Casey",
         last_name: sentinel,
-        email: `${sentinel}.nested@private.test`,
-        phone: "+1-415-555-0123",
+        email: "casey.editable@example.com",
+        phone: "(202) 555-0142",
       },
-      new_company: { name: sentinel, website: "https://private.example.com", notes: sentinel },
+      new_company: {
+        name: `${sentinel} Labs`,
+        website: "https://labs.example.com",
+        notes: sentinel,
+      },
+      expected_close_date: "2040-02-03",
+      team_size: 7,
+      sales_representative_id: representative.id,
+      selling_price_ex_vat: "1234.56",
+      discount_percent: "12.00",
+      notes: sentinel,
       products: [
         {
           product_id: "product_01",
-          quantity: "987",
+          quantity: "7",
+          unit_price: "123.45",
+          discount_percent: "12.00",
           notes: sentinel,
-          preferred_schedule: sentinel,
+          preferred_schedule: "Tuesdays after 10am",
         },
       ],
-      notes: sentinel,
     });
-    expect(JSON.stringify(opportunity)).not.toContain(sentinel);
-    expect(opportunity.notes).toBe("Fictional sample note for the Aster CRM demo.");
-    expect(opportunity.products[0].notes).toBe("Fictional sample note for the Aster CRM demo.");
+    expect(opportunity.contact_name).toContain(sentinel);
+    expect(opportunity.company_name).toBe(`${sentinel} Labs`);
+    expect(opportunity.expected_close_date).toBe("2040-02-03");
+    expect(opportunity.team_size).toBe(7);
+    expect(opportunity.sales_representative_id).toBe(representative.id);
+    expect(opportunity.notes).toBe(sentinel);
+    expect(opportunity.products[0].quantity).toBe("7");
+    expect(opportunity.products[0].unit_price).toBe("123.45");
+    expect(opportunity.products[0].preferred_schedule).toBe("Tuesdays after 10am");
     const updatedOpportunity = await updateOpportunity(opportunity.id, {
-      notes: sentinel,
+      notes: `${sentinel}_UPDATED`,
       products: [
         {
           product_id: "product_02",
-          quantity: "987",
-          notes: sentinel,
-          preferred_schedule: sentinel,
+          quantity: "9",
+          unit_price: "456.78",
+          discount_percent: "8.00",
+          notes: `${sentinel}_LINE`,
         },
       ],
     });
-    expect(JSON.stringify(updatedOpportunity)).not.toContain(sentinel);
+    expect(updatedOpportunity.notes).toBe(`${sentinel}_UPDATED`);
+    expect(updatedOpportunity.products[0].quantity).toBe("9");
+    expect(updatedOpportunity.products[0].unit_price).toBe("456.78");
+    expect(updatedOpportunity.products[0].notes).toBe(`${sentinel}_LINE`);
 
     const activity = await createActivity({
       activity_type: "NOTE",
@@ -459,40 +499,43 @@ describe("Aster demo API session", () => {
       occurred_at: "2040-02-03T04:05:06.000Z",
       contact_id: contact.id,
     });
-    expect(JSON.stringify(activity)).not.toContain(sentinel);
-    expect(activity.description).not.toBe(sentinel);
-    expect(activity.occurred_at).toMatch(/^2026-10-(12|13|14)T/);
+    expect(activity.description).toBe(sentinel);
+    expect(activity.occurred_at).toBe("2040-02-03T04:05:06.000Z");
     const updatedActivity = await updateActivity(activity.id, {
-      description: sentinel,
-      occurred_at: "2040-02-03T04:05:06.000Z",
+      description: `${sentinel}_ACTIVITY`,
+      occurred_at: "2041-03-04T05:06:07.000Z",
     });
-    expect(JSON.stringify(updatedActivity)).not.toContain(sentinel);
+    expect(updatedActivity.description).toBe(`${sentinel}_ACTIVITY`);
+    expect(updatedActivity.occurred_at).toBe("2041-03-04T05:06:07.000Z");
 
     const inquiry = await createKioskInquiry({
       new_contact: {
-        first_name: sentinel,
+        first_name: "Walk-in",
         last_name: sentinel,
-        email: `${sentinel}.walkin@private.test`,
-        phone: "+1-415-555-0188",
+        email: "walkin.editable@example.com",
+        phone: "(202) 555-0118",
       },
-      company_name: sentinel,
+      company_name: `${sentinel} Event Co`,
       product_id: "product_01",
       notes: sentinel,
       consent: true,
     });
-    expect(JSON.stringify(inquiry)).not.toContain(sentinel);
+    expect(inquiry.contact_name).toContain(sentinel);
+    expect(inquiry.company_name).toBe(`${sentinel} Event Co`);
 
     await changeStage("opportunity_01", {
       to_stage_id: "stage_lost",
       reason: sentinel,
       loss_reason_id: "loss_timing",
-      loss_note: sentinel,
+      loss_note: `${sentinel}_LOSS`,
     });
-    expect(JSON.stringify(await getOpportunityHistory("opportunity_01"))).not.toContain(sentinel);
-    expect(sessionStorage.getItem("aster-crm-demo-v2")).not.toContain(sentinel);
-    expect(JSON.stringify(await listAudit({ limit: 100, offset: 0 }))).not.toContain(sentinel);
-  });
+    expect(JSON.stringify(await getOpportunityHistory("opportunity_01"))).toContain(sentinel);
 
+    const saved = JSON.parse(sessionStorage.getItem("aster-crm-demo-v2") ?? "null");
+    expect(JSON.stringify(saved)).toContain(sentinel);
+    expect(localStorage.getItem("aster-crm-demo-v2")).toBeNull();
+    expect(JSON.stringify(await listAudit({ limit: 100, offset: 0 }))).toContain(sentinel);
+  });
   it("drops legacy tab state that may contain visitor-entered values", async () => {
     const legacySentinel = "PRIVATE_LEGACY_CONTACT_4821";
     sessionStorage.setItem(

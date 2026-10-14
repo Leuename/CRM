@@ -15,7 +15,7 @@
 
    WHY IT OPENS WITH A REVEAL. The `contact` prop reaches this component masked
    — the demo simulator returns masked values for an OPERATIONS demo user, so the record
-   screen behind this dialog is holding "+63 916 ••• 0129", and pre-filling a
+   screen behind this dialog is holding "(202) 555-0129", and pre-filling a
    form with that would put bullets in an email field and seven digits in a
    ten-digit mobile field. The form needs the real values, and the local demo
    reveal operation returns them for both this dialog and "Reveal privately".
@@ -216,8 +216,8 @@ export function EditDetails({
       >
         <div className="k-demo-notice k-edit-demo-notice" role="note">
           <WarningGlyph />
-          Demo only. Do not enter real customer details. Changes stay in this tab and are not sent
-          to a live CRM.
+          Demo only. Do not enter real customer, employee, personal, or confidential data. Changes
+          stay in this tab and are not sent to a CRM service.
         </div>
         <h3 className="k-dialog-h">Edit details</h3>
         <p className="k-p">
@@ -246,7 +246,7 @@ export function EditDetails({
           </label>
           {/* Full width. An address is the longest thing on this form and the
               one the operator is most likely to be reading back to the customer
-              — "carlo.cruz@northstar-digit…" in a half-width box is the field
+              — "casey@aster.example" in a half-width box is the field
               you can least afford to truncate. */}
           <label className="k-field k-field-wide">
             <span className="k-field-label">

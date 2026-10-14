@@ -1,6 +1,6 @@
-# Synthetic data
+# Demo data and editable records
 
-All seeded business records are generated in `apps/web/lib/demo-data.ts`; none were derived by renaming or reshaping customer records. The mock API replaces visitor-entered business values with fictional presets before storing or returning a record.
+All records included with the demo are fictional and generated in `apps/web/lib/demo-data.ts`. They were not derived by renaming or reshaping customer records.
 
 | Entity                    |                     Seed amount |
 | ------------------------- | ------------------------------: |
@@ -13,14 +13,14 @@ All seeded business records are generated in `apps/web/lib/demo-data.ts`; none w
 | Activities                |                              42 |
 | Audit events and consents | 0 initially; created by actions |
 
-Records are linked across companies, contacts, products, opportunities, stages, owners, lead sources, and activities. Example-domain email addresses, fictional identities and businesses, reserved 202 phone ranges, invented addresses, synthetic USD amounts, and fictional timelines are used throughout.
+Seeded records are linked across companies, contacts, products, opportunities, stages, owners, lead sources, and activities. Example-domain email addresses, fictional identities and businesses, reserved fictional phone numbers, invented addresses, synthetic USD amounts, and fictional timelines are used throughout.
 
 Each seeded activity refers to its opportunity's primary contact and the same company as that opportunity; a unit test checks these links.
 
 The six accounts and common password `demo` are documented in the root README. These credentials are intentionally public demo values and must never be reused for real accounts.
 
-Create and edit forms keep their normal workflows, but submitted names, contact details, notes, dates, free text, and non-preset numeric values are converted to fictional sample values at the mock API boundary. Only selected relationships and finite categorical choices are retained. Non-example external company websites are cleared; invalid URL schemes are rejected. CRM, sign-in, and kiosk notices explain that saved values become fictional samples.
+Create, edit, and inquiry workflows preserve supported values as entered. The persistent notice says: **Demo only. Do not enter real customer, employee, personal, or confidential data.** Changes are stored in the current browser tab's `sessionStorage`; they are not sent to a CRM service, database, or shared visitor store. Values clear when the visitor signs out or closes the tab. A user's edited values are not guaranteed to be fictional, so visitors must use sample data only.
 
-The state key moved from `aster-crm-demo-v1` to `aster-crm-demo-v2`. On the next API request, the app removes the old tab-local state and starts from the synthetic seed so values entered with the earlier demo build cannot reappear. Deliberate DevTools edits can still alter a client-only simulator; the UI and role checks are not a security boundary.
+The simulator keeps allowlisted fields, validates relationships, and allows company websites only with safe `http` or `https` URLs. These measures keep the mock API shape predictable; they are not a production security boundary. Simulated roles can be inspected or altered in browser tools. Do not use the demo for real records or rely on it for access control.
 
-State is stored per browser tab and resets on logout. Tabs do not share edits, and there is no persistent server-side dataset.
+The state key moved from `aster-crm-demo-v1` to `aster-crm-demo-v2`; on first use the app removes the old tab-local key before loading the synthetic seed. Browser `sessionStorage` is isolated across fresh tabs, but browsers may copy it when a tab is duplicated or opened with an opener.

@@ -449,7 +449,7 @@ export function StepDetails({
               <input
                 className="k-input"
                 value={draft.company}
-                placeholder="Northstar Learning"
+                placeholder="Aster Learning Group"
                 autoComplete="organization"
                 onChange={(e) => onChange({ company: e.target.value })}
               />

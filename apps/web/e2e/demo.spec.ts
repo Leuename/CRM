@@ -12,6 +12,9 @@ test("the single demo sign-in button fills sample credentials and opens the dash
 }) => {
   await page.goto("/login");
   await expect(page.getByRole("heading", { name: "Welcome to the Aster CRM demo." })).toBeVisible();
+  await expect(page.getByRole("note")).toContainText(
+    "Do not enter real customer, employee, personal, or confidential data",
+  );
   await expect(page.getByRole("button", { name: "Sign in to demo" })).toHaveCount(1);
   await page.getByRole("button", { name: "Sign in to demo" }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
@@ -112,7 +115,10 @@ test("administrator signs in and sees the synthetic CRM dashboard", async ({ pag
   await signIn(page, "admin@aster.example");
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
-  await expect(page.getByRole("note")).toContainText("Do not enter real customer data");
+  await expect(page.getByRole("note")).toContainText(
+    "Do not enter real customer, employee, personal, or confidential data",
+  );
+  await expect(page.getByRole("note")).toContainText("not sent to a CRM service");
   await expect(page.getByText("Active opportunities", { exact: false }).first()).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Consultation: 6 inquiries, 21% of inquiries" }),
@@ -180,26 +186,36 @@ test("administrator can open every CRM list, detail, create, edit, and settings 
 test("operations account lands in the separate front desk shell", async ({ page }) => {
   await signIn(page, "desk@aster.example");
   await expect(page).toHaveURL(/\/kiosk$/);
-  await expect(page.getByRole("note")).toContainText("Do not enter real customer details");
+  await expect(page.getByRole("note")).toContainText(
+    "Do not enter real customer, employee, personal, or confidential data",
+  );
   await expect(page.getByRole("link", { name: /New inquiry/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /Find customer/ })).toBeVisible();
   await page.goto("/kiosk/customers");
-  await expect(page.getByRole("note")).toContainText("Do not enter real customer details");
+  await expect(page.getByRole("note")).toContainText(
+    "Do not enter real customer, employee, personal, or confidential data",
+  );
   await page.goto("/kiosk/inquiries");
-  await expect(page.getByRole("note")).toContainText("Do not enter real customer details");
+  await expect(page.getByRole("note")).toContainText(
+    "Do not enter real customer, employee, personal, or confidential data",
+  );
   await page.goto("/kiosk/visits");
-  await expect(page.getByRole("note")).toContainText("Do not enter real customer details");
+  await expect(page.getByRole("note")).toContainText(
+    "Do not enter real customer, employee, personal, or confidential data",
+  );
   await page.goto("/kiosk");
   await page.getByRole("link", { name: /New inquiry/ }).click();
-  await expect(page.getByRole("note")).toContainText("Do not enter real customer details");
-  await expect(page.getByRole("note")).toContainText("not sent or followed up");
+  await expect(page.getByRole("note")).toContainText(
+    "Do not enter real customer, employee, personal, or confidential data",
+  );
+  await expect(page.getByRole("note")).toContainText("not sent to a CRM service or followed up");
 
   await page.goto("/kiosk/customers/contact_01");
   await page.getByRole("button", { name: "Edit details" }).click();
   await expect(page.getByRole("dialog", { name: "Edit customer details" })).toBeVisible();
   await expect(
     page.getByRole("dialog", { name: "Edit customer details" }).getByRole("note"),
-  ).toContainText("Do not enter real customer details");
+  ).toContainText("Do not enter real customer, employee, personal, or confidential data");
 });
 
 test("kiosk routes provide a skip link, main landmark, and one page heading", async ({ page }) => {
@@ -252,10 +268,10 @@ test("kiosk customer edit dialog fits a phone viewport and saves", async ({ page
   await dialog.getByLabel("Company").fill("Aster Demo Group");
   await dialog.getByRole("button", { name: "Save changes" }).click();
   await expect(dialog).toHaveCount(0);
-  await expect(page.getByText("Demo Company 17")).toBeVisible();
+  await expect(page.getByText("Aster Demo Group")).toBeVisible();
 });
 
-test("sales account can create and find a synthetic individual", async ({ page }) => {
+test("sales account can create, reload, and find an editable demo individual", async ({ page }) => {
   await signIn(page, "sales@aster.example");
   await page.goto("/customers/individuals/new");
   await page.getByLabel("First name").fill("Robin");
@@ -264,10 +280,15 @@ test("sales account can create and find a synthetic individual", async ({ page }
   await page.getByRole("button", { name: "Add individual" }).click();
 
   await expect(page).toHaveURL(/\/customers\/individuals\/contact_/);
-  await expect(page.getByText("Amara Bennett").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Robin Demo" })).toBeVisible();
+  await expect(page.getByText("robin.demo@aster.example").first()).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Robin Demo" })).toBeVisible();
   await page.goto("/customers/individuals");
-  await page.getByPlaceholder("Name, email, phone, company").fill("demo.contact.31");
-  await expect(page.getByText("Amara Bennett").first()).toBeVisible();
+  await page.getByPlaceholder("Name, email, phone, company").fill("robin.demo@aster.example");
+  await expect(page.getByRole("row").filter({ hasText: "robin.demo@aster.example" })).toContainText(
+    "Robin Demo",
+  );
 });
 
 test("opportunity creation action stays fully visible on a phone viewport", async ({ page }) => {
@@ -347,11 +368,15 @@ test("browser tabs keep demo changes isolated", async ({ page }) => {
   await page.getByLabel("Last name").fill("Private Tab");
   await page.getByLabel("Email").fill("robin.private-tab@aster.example");
   await page.getByRole("button", { name: "Add individual" }).click();
-  await expect(page.getByText("Amara Bennett")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Robin Private Tab" })).toBeVisible();
 
   await secondTab.goto("/customers/individuals");
-  await secondTab.getByPlaceholder("Name, email, phone, company").fill("demo.contact.31");
-  await expect(secondTab.getByText("Amara Bennett")).toHaveCount(0);
+  await secondTab
+    .getByPlaceholder("Name, email, phone, company")
+    .fill("robin.private-tab@aster.example");
+  await expect(
+    secondTab.getByRole("row").filter({ hasText: "robin.private-tab@aster.example" }),
+  ).toHaveCount(0);
   await secondTab.close();
 });
 
@@ -376,7 +401,7 @@ test("company website inputs and stored links only use safe web URLs", async ({ 
     const state = JSON.parse(sessionStorage.getItem("aster-crm-demo-v2") ?? "null");
     const company = state?.companies?.find(
       (row: { name: string; website: string | null }) =>
-        row.name === "Demo Company 17" && row.website === "https://demo.example/",
+        row.name === "URL Safety Demo" && row.website === "https://demo.example/",
     );
     if (!company) throw new Error("Demo company was not stored");
     company.website = "javascript:alert(1)";

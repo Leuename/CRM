@@ -45,8 +45,8 @@ export function Confirmation({
           Demo inquiry simulated
         </h2>
         <p className="k-p">
-          This fictional inquiry stayed in this browser tab. It was not sent and no follow-up will
-          happen.
+          This demo inquiry stayed in this browser tab. It was not sent to a CRM service and no
+          follow-up will happen.
         </p>
 
         <div className="k-ref-plate">

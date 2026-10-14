@@ -101,14 +101,17 @@ export default function LoginPage() {
           </h1>
 
           <p
+            role="note"
             style={{
               margin: "-40px 0 0",
               font: "400 14px/21px var(--font-ui)",
               color: "var(--text-secondary)",
             }}
           >
-            Demo only. <strong>Sign in to demo</strong> fills fictional sample credentials and opens
-            the dashboard. Values entered in the demo become fictional samples when saved.
+            Demo only. Do not enter real customer, employee, personal, or confidential data.{" "}
+            <strong>Sign in to demo</strong>
+            fills fictional sample credentials and opens the dashboard. Entries stay in this browser
+            tab, are not sent to a CRM service, and clear when you sign out or close the tab.
           </p>
 
           <div

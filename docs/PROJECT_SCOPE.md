@@ -4,13 +4,13 @@
 
 Deliver a public-ready Aster CRM portfolio demo that preserves the existing CRM screens and workflows while replacing the organization identity, colors, business data, and runtime service layer with fictional equivalents.
 
-The project owner confirmed permission to redistribute the copied application and design materials. The source repository remains a separate read-only reference; the target has an independent Git history. At the 2026-10-14T09:19+08:00 (Manila) check, PR #1's `feat/portfolio-demo` branch was at `f7e46599fd874781e270a6e8e43fdc9eee000c41`. Vercel built that commit as a READY, SSO-protected preview; production remains disabled.
+The project owner confirmed permission to redistribute the copied application and design materials. The source repository remains a separate read-only reference; the target has an independent Git history. The current release candidate keeps business edits in the browser tab and displays a warning against entering real or confidential data. Production remains disabled while the October 14 Next.js security update is pending; the whole-worktree source scan found no reportable issues. See [release readiness](RELEASE_READINESS.md).
 
 ## Included
 
 - All 32 application routes from the reference frontend, including customer, company, product, opportunity, dashboard, settings, audit, and front-desk screens.
-- A same-origin API adapter with session-scoped synthetic state, simulated sign-in, CRUD workflows, authorization, dashboard aggregation, audit entries, and kiosk actions.
-- Create and edit inputs are normalized to fictional presets at the mock API boundary; pre-v2 tab state is discarded on upgrade.
+- A same-origin API adapter with session-scoped demo state, simulated sign-in, editable CRUD workflows, client-side demo role gates, dashboard aggregation, audit entries, and kiosk actions.
+- Create and edit values are preserved in the current tab's `sessionStorage`; unsupported fields are dropped, relationships are validated, and unsafe website schemes are rejected. A persistent warning tells visitors not to enter real or confidential data.
 - Six fictional roles: Administrator, Manager, Sales, Finance, Operations, and Triage.
 - Aster Advisory branding, a centralized blue/indigo palette, new logo and icon, and synthetic USD data.
 - Type, lint, local boundary, unit/integration, build, and browser smoke-test commands.
@@ -23,4 +23,4 @@ The project owner confirmed permission to redistribute the copied application an
 
 ## Acceptance status
 
-The application builds locally and the simulator is covered by automated tests. The candidate passes typecheck, lint, 24 unit tests and 4 boundary tests, a production build, and 23 Playwright tests. PR #1's Vercel deployment and preview checks passed for commit `f7e46599fd874781e270a6e8e43fdc9eee000c41`. Vercel still reports live=false and SSO for all deployments, so production is not publicly accessible. The October 14 Next.js security update remains a release gate. Review release readiness and deployment notes for the remaining gate.
+The application builds locally and the simulator is covered by automated tests. The current candidate passes typecheck, lint, boundary checks, 24 unit tests, 23 Playwright tests, and Gitleaks. The whole-worktree Codex Security scan completed with zero reportable findings. The preview remains protected and production is not publicly accessible. The October 14 Next.js security update and Vercel production settings remain release gates. Review release readiness and deployment notes for the remaining gates.

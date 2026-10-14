@@ -21,7 +21,7 @@ The UI uses Next.js App Router, React, TypeScript, and the included design syste
 
 ## Rebrand and cleanup
 
-The app is named Aster CRM and uses the fictional advisory firm Aster Advisory. Brand marks, favicon, palette, login illustration, metadata, currency, and demo catalog were replaced or adapted. The included frontend was scrubbed of source-specific identifiers and operating details. The UI structure and route hierarchy remain in place.
+The app is named Aster CRM and uses the fictional advisory firm Aster Advisory. Brand marks, favicon, palette, login illustration, metadata, currency, and demo catalog were replaced or adapted. A follow-up public-source sweep replaced remaining source-specific seed/placeholder text with Aster demo copy and replaced customer-shaped masked phone/email examples in source comments with fictional examples. The included frontend was scrubbed of source-specific identifiers and operating details. The UI structure and route hierarchy remain in place.
 
 ## Audit limits
 

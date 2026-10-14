@@ -164,8 +164,8 @@ export default function CustomerRecord() {
           contact={contact}
           onClose={() => setEditing(false)}
           onSaved={(updated) => {
-            // Use the simulator response, which normalizes the phone and may
-            // link a company that the kiosk only named.
+            // Use the saved simulator response, including any newly linked
+            // company the kiosk only named.
             setState((cur) =>
               cur.status === "ready"
                 ? { status: "ready", record: { ...cur.record, contact: updated } }

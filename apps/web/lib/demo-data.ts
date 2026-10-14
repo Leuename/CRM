@@ -171,7 +171,7 @@ const lastNames = [
 ];
 const companyNames = [
   "Juniper & Co.",
-  "Northstar Learning",
+  "Aster Learning Group",
   "Cedarfield Studio",
   "Brightline Analytics",
   "Morrow Health Group",
